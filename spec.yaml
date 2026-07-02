@@ -1,0 +1,77 @@
+blueprint:
+  id: wax-permission-visualizer-and-editor
+  tier: 1
+  category: security-foundational
+  status: alpha-ready
+  benchmark_target: gkniftyheads-tracker + PX
+  last_updated: "2026-07-02"
+
+features:
+  - name: interactive_hierarchical_permission_tree
+    implementation: custom_svg_recursive + canvas_overlay
+    retro_pixel: true
+  - name: safe_multi_sig_threshold_simulator
+    implementation: pure_client_js_engine
+    safety_rules: 10+
+  - name: live_wax_account_fetch
+    implementation: native_fetch_to_wax_rpc + hyperion_fallback
+  - name: editor_mode_with_local_draft_persistence
+    implementation: zustand_localforage
+  - name: accessibility
+    reduced_motion: true
+    haptics: optional
+    aria: full
+    keyboard_nav: true
+  - name: retro_pixel_glassmorphic_crt_theme
+    implementation: tailwind_shadcn_pixel_overrides
+  - name: wharfkit_proposal_signing
+    implementation: optional_session_kit
+
+recommended_stack:
+  framework: Next.js 15 App Router
+  language: TypeScript (strict)
+  viz: custom_svg_canvas_tree
+  state: zustand + tanstack_query
+  fetch: native_rpcs
+  theme: tailwind + shadcn + framer_motion
+
+integration_points:
+  - PxWallet: load current account permissions instantly via useAccountPermissions
+  - PxHotOrNot / DAO tools: embed viewer for proposal safety checks
+  - entropy: useOnChainEntropy helper for any weighted random simulations
+  - PxPackages: @pxjourney/permission-utils (future shared package)
+
+machine_instructions_for_ai_devs:
+  - "Generate full Next.js 15 scaffold with Zustand store for permission drafts"
+  - "Implement recursive SVG permission tree with keyboard navigation and drag-to-reorder in editor mode"
+  - "Add pure JS threshold engine with 10+ safety validation rules and risk levels"
+  - "Include WharfKit session example for live on-chain proposal preview"
+  - "Create accessible glassmorphic CRT theme with reduced-motion support"
+  - "Add copy-paste integration snippets for PxWallet and any dApp"
+
+pros_cons_variations:
+  visualization_library:
+    - option: "custom_svg_canvas"
+      pros: ["zero dependencies", "pixel-perfect retro control", "educational code", "lightest bundle"]
+      cons: ["more initial layout code"]
+    - option: "@xyflow/react"
+      pros: ["fastest development time", "beautiful defaults out of box"]
+      cons: ["larger bundle", "harder to achieve pure pixel retro aesthetic"]
+    - option: "D3.js"
+      pros: ["powerful layout algorithms"]
+      cons: ["heavier", "steeper learning curve for simple trees"]
+
+  state_management:
+    - option: "zustand"
+      pros: ["tiny footprint", "excellent TypeScript support", "perfect for local draft persistence"]
+      cons: ["slightly less 'magic' than some alternatives"]
+
+security_notes:
+  - All analysis read-only until explicit user signing
+  - Strong warnings for dangerous operations (owner key removal, threshold misconfig)
+  - Clear distinction between viewer and propose modes
+
+on_chain_entropy:
+  ready: true
+  implementation: "TX hash + recent block header parsing (WharfKit broadcast)"
+  use_case: "weighted random simulations in future extensions (no RAM fees)"
