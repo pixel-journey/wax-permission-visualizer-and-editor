@@ -1,35 +1,56 @@
 # wax-permission-visualizer-and-editor — Account Permission Visualizer & Editor
 
-> **Status:** ✅ **FULL PX PERFECTION (Alpha-Ready)** | Public Release Target: July 2026  
+> **Status:** 🔄 In Active Deep Refinement (PX Perfection Standard)  
 > **Category:** Authentication, Multi-Sig & Permission Management (Core Antelope/EOSIO)  
 > **Parent Catalog:** [pixel-journey/wax-ecosystem-blueprint-catalog](https://github.com/pixel-journey/wax-ecosystem-blueprint-catalog)
-> **Benchmark Standard:** henrikpiga/gkniftyheads-tracker (education depth, completeness, dev guidance, examples) + Pixel Journey retro-pixel glassmorphic excellence
+> **Benchmark Standard:** gkniftyheads-tracker quality + Pixel Journey retro-pixel excellence + PX Perfection Standard v1.0
 
 **One-sentence goal:** An elegant, interactive, safe visualizer + editor for Antelope/EOSIO-style account permissions on WAX. Hierarchical trees, multi-sig thresholds (M-of-N), weight math, live previews, safety warnings, and one-click WharfKit proposals — all client-side with zero custom contracts.
 
 ---
 
-## 1. Overview & Why This Matters (Educational Core)
+## 1. Educational Core — Why Permissions Matter (Deep Dive)
 
-The Antelope permission model is one of the most powerful yet dangerous features in blockchain. A single misconfigured threshold or lost owner key can permanently lock funds. This blueprint turns that complexity into clarity.
+The Antelope permission model is simultaneously one of the most powerful and one of the most dangerous features in blockchain. A single misconfigured threshold, a lost owner key, or an overly permissive `active` key can result in permanent loss of funds with almost no recovery path.
 
-### Core Concepts (Explained Simply)
-- **owner vs active**: `owner` is the root of trust. `active` handles day-to-day actions. `owner` can change `active`; `active` cannot touch `owner`.
-- **Weights + Thresholds**: Every key or linked account has a weight. The permission has a threshold. Sum of signing weights must ≥ threshold.
-- **Multi-sig (M-of-N)**: 2-of-3, 3-of-5 etc. Common in DAOs, teams, exchanges.
-- **Linked Permissions**: Fine-grained control (e.g. only `transfer` on a specific contract).
+Unlike many other chains, Antelope gives users and DAOs extremely fine-grained control — but that control comes with significant responsibility and complexity.
 
-**Common Catastrophic Mistakes This Tool Prevents**:
-- Accidentally removing the last owner key
-- Setting threshold higher than total available weight
-- Giving `active` permission to change `owner`
-- Losing access during key rotation
+### The Core Mental Model
 
-**Success Metrics (gkniftyheads-tracker level)**:
-- Visualize any WAX account permission tree in < 1.5s
-- 100% accurate threshold math + safety warnings
-- 95+ Lighthouse accessibility/performance
-- Copy-paste integration into any dApp in < 10 minutes
+Think of permissions like a high-security vault system:
+
+- **Owner** = The master deed / root of trust. It controls everything, including the ability to change other permissions.
+- **Active** = The daily-use keys. It can perform most actions but cannot change the `owner` permission.
+- **Weights & Thresholds** = How many signatures (and how strong) are required to open the vault.
+- **Linked Permissions** = Special rules that only apply to specific contracts or actions (e.g. only `transfer` on a token contract).
+
+This model is incredibly powerful for security and governance, but it is also easy to get wrong — often with irreversible consequences.
+
+### Why Most People Underestimate This Area
+
+Many developers treat permissions as a one-time setup task. In reality, permission structures evolve over time (key rotations, multi-sig changes, team member changes, DAO governance). Every change carries risk. The visualizer exists to make these risks visible before they become disasters.
+
+### Common Catastrophic Mistakes (And How This Tool Helps)
+
+| Mistake | What Happens | Why It’s Dangerous | How the Visualizer Protects You |
+|---------|--------------|--------------------|----------------------------------|
+| **Removing the last owner key** | Complete loss of account control | Irreversible in most cases | Clearly shows when owner permission would have zero valid keys |
+| **Setting threshold higher than total weight** | Actions become impossible | Funds get stuck | Live threshold math with clear warnings |
+| **Giving `active` permission to change `owner`** | Anyone with active can take full control | Complete takeover risk | Highlights dangerous permission relationships |
+| **Losing access during key rotation** | Temporary or permanent lockout | High stress, potential loss | Preview mode shows exactly what the new structure will look like |
+| **Overly permissive linked permissions** | Smart contracts can be abused | Unexpected actions possible | Visual tree makes linked permissions obvious |
+| **Not understanding multi-sig requirements** | Failed transactions or weak security | Poor governance | Clear M-of-N visualization and simulation |
+
+### Learning Outcomes
+
+After studying and using this blueprint, you will be able to:
+
+- Visually audit and understand any WAX (or Antelope) account’s permission structure at a glance
+- Design safe and effective multi-sig and permission setups
+- Identify dangerous or fragile permission configurations before they cause problems
+- Safely perform key rotations and permission changes with confidence
+- Explain permission concepts clearly to team members or DAO participants
+- Build or integrate permission tools into your own applications
 
 ---
 
@@ -329,7 +350,7 @@ Toggle between **Viewer** (read-only) and **Editor** (local drafts + safety prev
 ## 10. Related Blueprints & Ecosystem Synergy
 
 This is **Tier 1 foundational security tooling**. Direct companions:
-- `wax-safe-key-rotation-assistant` (next in queue)
+- `wax-safe-key-rotation-assistant`
 - `wax-multi-sig-proposal-builder-and-simulator`
 - `wax-account-permission-auditor`
 
@@ -342,4 +363,4 @@ All share the same spec.yaml pattern for instant cross-tool integration.
 MIT License — Built with ❤️ for safer Antelope permission management.
 Pixel Journey — Beautiful interfaces for public blockchain data.
 
-*Last updated: July 02, 2026 — Full PX Perfection commit*
+*Last updated: July 02, 2026 — Deep Educational Refinement Pass*
