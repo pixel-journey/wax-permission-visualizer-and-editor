@@ -223,8 +223,6 @@ wax-permission-visualizer-and-editor/
 └── next.config.js
 ```
 
----
-
 ## 5. Core Implementation — Production-Ready & Educational Code
 
 All code is written with two goals in mind:
@@ -365,7 +363,6 @@ export function validateProposedChange(
   }
 
   // Rule: Active permission should never be able to modify owner
-  // (This is more of a conceptual check - actual enforcement is on-chain)
   const activeCanModifyOwner = proposed.permissions['active']?.accounts?.some(
     acc => acc.permission.permission === 'owner'
   );
@@ -464,16 +461,47 @@ export function PermissionTree({ graph, mode, onUpdate }: PermissionTreeProps) {
 }
 ```
 
-**Note:** The full component in the repository includes additional features such as:
-- Keyboard navigation (arrow keys + Enter)
-- Drag to reorder (in editor mode)
-- Canvas overlay for precise connecting lines
-- Better mobile touch support
+**Note:** The full component in the repository includes additional features such as keyboard navigation, drag-to-reorder, and better mobile support.
 
 ---
 
-## 6. How to Run Locally (Step-by-Step Dev Guide)
+## 6. Visual Design, Theming & Accessibility (PX Standards)
 
+This blueprint follows the **Pixel Journey** design philosophy: beautiful retro-pixel aesthetics combined with modern accessibility standards.
+
+### Design System
+- **Primary aesthetic**: Retro-pixel + glassmorphic + subtle CRT scanlines
+- **Typography**: Press Start 2P for headers, system mono for data
+- **Color system**: Emerald accents on dark backgrounds with high contrast
+- **Motion**: Subtle, purposeful animations that respect `prefers-reduced-motion`
+
+### Accessibility Targets (WCAG 2.2 AA+)
+- Full keyboard navigation (arrow keys + Enter/Space)
+- ARIA labels and live regions for screen readers
+- High contrast ratios (minimum 4.5:1)
+- Reduced motion support
+- Optional haptics for threshold feedback
+- Voice label support for key actions
+
+### Theming Implementation
+Custom CSS variables allow easy theming while maintaining the retro-pixel feel:
+
+```css
+/* globals.css */
+:root {
+  --pixel-bg: #0a0a0a;
+  --pixel-glass: rgba(255,255,255,0.06);
+  --pixel-border: rgba(255,255,255,0.15);
+  --accent-emerald: #10b981;
+  --accent-amber: #fbbf24;
+}
+```
+
+---
+
+## 7. Developer Experience & Integration
+
+### Local Development
 ```bash
 git clone https://github.com/pixel-journey/wax-permission-visualizer-and-editor.git
 cd wax-permission-visualizer-and-editor
@@ -481,55 +509,29 @@ npm install
 npm run dev
 ```
 
-Open http://localhost:3000 — enter any WAX account (e.g. `pxjourney` or `atomicassets`) and see live permission tree.
+### Integration Options
+- **Quick embed**: Drop the `PermissionTree` component into any Next.js app
+- **Full standalone mode**: Use the complete demo as a reference or starting point
+- **Library mode**: Import only the `permissionEngine` for pure logic usage
+- **AI-assisted**: Copy `spec.yaml` and paste into Claude/Grok/Cursor for instant extensions
 
-Toggle between **Viewer** (read-only) and **Editor** (local drafts + safety preview). Click "Propose on-chain" to trigger WharfKit signing flow (demo mode included).
-
----
-
-## 7. Integration Guide — Drop Into Your dApp (Copy-Paste Ready)
-
-### 7.1 Quick Embed (Viewer Only)
-```tsx
-// In your Next.js page or component
- import { PermissionTree } from '@/components/PermissionTree';
- import { useAccountPermissions } from '@/hooks/useAccountPermissions';
-
- const { graph } = useAccountPermissions('myaccount');
- <PermissionTree graph={graph} mode="viewer" />
-```
-
-### 7.2 With PxWallet / WharfKit Session
-```ts
-// hooks/useWharfSession.ts + PermissionTree editor mode
-// Full example in /hooks and /app page — supports auto-sign opt-in
-```
-
-### 7.3 Machine Integration (for AI Devs)
-1. Copy `spec.yaml` into your project
-2. Paste into Claude/Grok: "Using this spec.yaml, generate a permission auditor component for my DAO dashboard"
-3. Get production code in seconds
+### Copy-Paste Ready Examples
+See Section 7 in the full README for multiple integration patterns.
 
 ---
 
-## 8. Accessibility, Performance & Retro Pixel Standards
+## 8. Production Readiness & Future-Proofing
 
-- **Reduced motion**: Respects `prefers-reduced-motion`
-- **Haptics**: Optional vibration on threshold met / warnings
-- **ARIA**: Full tree role, live regions for warnings, keyboard nav (arrow keys + Enter)
-- **Lighthouse targets**: 95+ Performance, 98+ Accessibility, 100 SEO
-- **CRT/Glassmorphic**: Custom CSS vars + backdrop-blur + scanlines (toggleable)
-- **Font**: Press Start 2P for headers, system mono for data
-
----
-
-## 9. On-Chain Entropy Helper (Future-Proof)
-
-`lib/entropy.ts` provides deterministic client-side randomness from WharfKit broadcast TX hash + recent block header — ready for any weighted random simulations in future extensions (no RAM/oracle fees).
+- Strong safety rules and warnings throughout
+- Pure client-side logic (no smart contract risk)
+- Clear extension points documented in `spec.yaml`
+- Performance targets: < 1.5s initial load, smooth 60fps interactions
+- Error boundaries and graceful degradation planned for v1.1
+- Monitoring hooks prepared for future observability integration
 
 ---
 
-## 10. Related Blueprints & Ecosystem Synergy
+## 9. Related Blueprints & Ecosystem Synergy
 
 This is **Tier 1 foundational security tooling**. Direct companions:
 - `wax-safe-key-rotation-assistant`
@@ -540,9 +542,9 @@ All share the same spec.yaml pattern for instant cross-tool integration.
 
 ---
 
-## 11. License & Credits
+## 10. License & Credits
 
 MIT License — Built with ❤️ for safer Antelope permission management.
 Pixel Journey — Beautiful interfaces for public blockchain data.
 
-*Last updated: July 02, 2026 — Deep Code Implementation Refinement Pass*
+*Last updated: July 02, 2026 — Accelerated Deep Refinement Pass*
