@@ -54,20 +54,30 @@ After studying and using this blueprint, you will be able to:
 
 ---
 
-## 2. Tech Recommendations Matrix (Pros/Cons + Final Choices)
+## 2. Tech Recommendations Matrix — Deep Rationale
 
-We evaluated multiple options for maximum education value, performance, and future-proofing. Final choices prioritize **zero custom contracts**, **client-side only**, **retro-pixel aesthetic**, and **maximum reusability**.
+We evaluated multiple technical approaches with one primary goal in mind: **maximizing educational value and long-term reusability** while maintaining excellent performance and developer experience.
 
-| Component                  | Recommended (Chosen)              | Alternative A                          | Alternative B                     | Pros of Chosen | Cons of Chosen | When to Use Alternative |
-|----------------------------|-----------------------------------|----------------------------------------|-----------------------------------|---------------|---------------|-------------------------|
-| **Visualization**         | Custom hierarchical SVG + Canvas tree (recursive layout) | @xyflow/react (React Flow)            | D3.js force/tree                 | Zero deps, pixel-perfect retro control, educational code, lightweight | More initial layout code | Use React Flow if you want fastest dev time and don't mind bundle size |
-| **State**                 | Zustand + TanStack Query         | Jotai                                 | Redux Toolkit                    | Tiny, excellent TS, perfect for draft persistence | Slightly less "magic" | Jotai for even simpler single-file demos |
-| **Blockchain Fetch**      | Native `fetch` to WAX RPC + optional WharfKit | @wharfkit/account-kit only           | Legacy eosjs                     | No legacy deps, works everywhere, easy to audit | Manual parsing | WharfKit-only if already deep in WharfKit ecosystem |
-| **Editor Interactions**   | SVG + Framer Motion drag + pointer events | React Flow built-in drag             | Pure Canvas hit-testing          | Best retro feel + accessibility (keyboard + screen reader) | Custom drag logic | React Flow for rapid prototyping |
-| **Multi-sig Simulation**  | Pure client-side JS threshold engine | WASM simulation                      | On-chain msig preview            | Instant, free, educational, no fees | No real on-chain execution until user signs | On-chain only for final proposal validation |
-| **Theming**               | Tailwind + shadcn/ui + custom pixel CSS vars + CRT/glassmorphic | Full custom CSS from scratch        | Headless UI primitives only      | Fast consistent UI + easy pixel overrides | Requires theme overrides | Full custom if you have strong design system already |
+Every decision was made with the following priorities (in order):
 
-**Why these choices win for education & reusability**: Every decision is explained with trade-offs so future devs (and their AI agents) can make informed decisions in their own projects.
+1. **Educational clarity** — The code and architecture should teach good patterns.
+2. **Zero external dependencies where possible** — Easier to audit, learn from, and maintain.
+3. **Client-side only** — No custom smart contracts required.
+4. **Retro-pixel aesthetic + accessibility** — Aligns with Pixel Journey identity and WCAG standards.
+5. **Future extensibility** — The architecture should support new features without major rewrites.
+
+### Detailed Technology Decisions
+
+| Component                  | Chosen Approach                          | Why This Choice Wins for Education & Longevity                                                                 | Trade-offs                                                                 | When Another Option Might Be Better |
+|----------------------------|------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------|-------------------------------------|
+| **Visualization**         | Custom recursive SVG + Canvas           | Maximum control over pixel-perfect retro aesthetic. Educational value is higher because developers can read and understand the rendering logic. Lightweight and dependency-free. | Requires more initial code for layout and interactions.                   | Use React Flow if speed of development is the absolute top priority and bundle size is acceptable. |
+| **State Management**      | Zustand + TanStack Query                | Zustand is tiny, excellent with TypeScript, and has minimal boilerplate. TanStack Query handles data fetching and caching cleanly. This combination teaches modern, lightweight state patterns. | Slightly less “magical” than some alternatives.                           | Jotai can be used for even simpler single-file demos or prototypes. |
+| **Blockchain Data**       | Native fetch + optional WharfKit        | Avoids locking into legacy libraries. Native fetch is universal, auditable, and teaches fundamental web + blockchain interaction. Easy to swap or extend. | Slightly more manual parsing than using a full account kit.               | Use @wharfkit/account-kit if you are already deep in the WharfKit ecosystem. |
+| **Editor Interactions**   | Custom SVG + Framer Motion              | Best balance of retro feel, accessibility (keyboard + screen reader), and smooth interactions. Educational because the interaction logic is visible and understandable. | More custom code than using a library’s built-in drag system.             | React Flow if rapid prototyping is needed. |
+| **Multi-sig Simulation**  | Pure client-side JavaScript engine      | Instant feedback, completely free, highly educational. Users can experiment with different key combinations without any on-chain cost or delay. | Cannot execute real on-chain proposals until the user explicitly signs.   | Use on-chain preview only for final validation before broadcasting. |
+| **Theming & Styling**     | Tailwind + shadcn/ui + custom pixel CSS | Fast consistent UI development + easy to override with retro-pixel / CRT / glassmorphic aesthetics. Teaches modern component patterns while allowing strong visual identity. | Requires some theme customization work.                                   | Full custom CSS only if you already have a very strong existing design system. |
+
+**Key Insight**: Every technical choice was evaluated not just for “does it work?”, but for “does this help someone learn and build better things in the future?”
 
 ---
 
@@ -363,4 +373,4 @@ All share the same spec.yaml pattern for instant cross-tool integration.
 MIT License — Built with ❤️ for safer Antelope permission management.
 Pixel Journey — Beautiful interfaces for public blockchain data.
 
-*Last updated: July 02, 2026 — Deep Educational Refinement Pass*
+*Last updated: July 02, 2026 — Deep Technical Decisions Refinement Pass*
