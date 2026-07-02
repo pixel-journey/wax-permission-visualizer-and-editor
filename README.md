@@ -81,40 +81,118 @@ Every decision was made with the following priorities (in order):
 
 ---
 
-## 3. Machine-Optimized Spec (spec.yaml)
+## 3. Machine-Optimized Spec (spec.yaml) — Deep Version
 
-Located at repo root: `spec.yaml`. Designed for AI agents (Claude, Grok, Antigravity, Cursor, etc.) and scripts to instantly scaffold or extend this blueprint in any personal project.
+This repository includes a comprehensive `spec.yaml` designed specifically for AI coding agents (Claude, Grok, Cursor, Windsurf, etc.). It allows agents to instantly understand the blueprint and generate high-quality extensions or new implementations.
+
+### How to Use This Spec with AI Agents
+
+**Recommended Prompt Pattern:**
+
+```
+You are an expert WAX/Antelope developer following the PX Perfection Standard.
+
+Using the following spec.yaml from the permission visualizer blueprint, generate [specific feature or component] for my project:
+
+[paste entire spec.yaml here]
+
+Requirements:
+- Follow the same educational depth and code quality standards
+- Maintain retro-pixel aesthetic where applicable
+- Use TypeScript strictly
+- Prioritize client-side solutions
+```
+
+### Full spec.yaml
 
 ```yaml
-# Paste this entire block into any AI to regenerate/extend
 blueprint:
-  id: wax-permission-visualizer-and-editor
+  id: "wax-permission-visualizer-and-editor"
+  name: "Account Permission Visualizer & Editor"
+  version: "1.0.0"
   tier: 1
-  category: security-foundational
-  status: alpha-ready
-  benchmark_target: gkniftyheads-tracker + PX
+  category: "security-foundational"
+  status: "alpha-ready"
+  benchmark_target: "gkniftyheads-tracker + PX Perfection Standard v1.0"
+
+  description: |
+    An elegant, interactive, safe visualizer + editor for Antelope/EOSIO-style 
+    account permissions on WAX. Features hierarchical trees, multi-sig thresholds 
+    (M-of-N), weight math, live previews, safety warnings, and WharfKit integration.
+    All client-side with zero custom smart contracts required.
 
 features:
-  - interactive_hierarchical_permission_tree_svg
-  - safe_multi_sig_threshold_simulator
-  - live_wax_account_fetch
-  - editor_mode_with_local_draft_persistence
-  - accessibility: reduced_motion, haptics, aria, voice_labels
-  - retro_pixel_glassmorphic_crt_theme
-  - wharfkit_proposal_signing
+  core:
+    - interactive_hierarchical_permission_tree_svg
+    - safe_multi_sig_threshold_simulator
+    - live_wax_account_fetch
+    - editor_mode_with_local_draft_persistence
+    - safety_warnings_and_risk_levels
+  accessibility:
+    - reduced_motion_support
+    - keyboard_navigation
+    - screen_reader_friendly
+    - optional_haptics
+    - voice_labels
+  theming:
+    - retro_pixel_glassmorphic_crt_theme
+    - toggleable_scanlines
+    - high_contrast_modes
+  integration:
+    - wharfkit_proposal_signing
+    - embeddable_viewer_component
+    - full_standalone_demo
 
-recommended_stack: { viz: "custom_svg_canvas", state: "zustand", fetch: "native_rpcs" }
+recommended_stack:
+  framework: "Next.js 15 (App Router)"
+  language: "TypeScript (strict)"
+  styling: "Tailwind CSS + shadcn/ui + custom pixel CSS vars"
+  state: "Zustand + TanStack Query"
+  visualization: "Custom recursive SVG + Canvas (dependency-free)"
+  data_fetching: "Native fetch to WAX RPC + optional WharfKit"
+  simulation: "Pure client-side JavaScript threshold engine"
+
+core_files:
+  - path: "lib/permissionEngine.ts"
+    purpose: "Pure client-side threshold calculation and safety rules"
+  - path: "components/PermissionTree.tsx"
+    purpose: "Interactive SVG + Canvas permission tree visualizer/editor"
+  - path: "components/ThresholdSimulator.tsx"
+    purpose: "Live multi-sig threshold simulation UI"
+  - path: "spec.yaml"
+    purpose: "Machine-optimized specification for AI agents"
 
 integration_points:
-  - PxWallet: instant permission load for any account
-  - PxHotOrNot / DAO tools: embed viewer for proposal safety
-  - entropy: useOnChainEntropy helper for weighted simulations
+  - name: "PxWallet"
+    description: "Instant permission load for any connected account"
+  - name: "DAO Tools / Governance"
+    description: "Embed viewer for proposal safety checking"
+  - name: "Key Rotation Assistants"
+    description: "Preview mode for safe key rotation workflows"
+  - name: "Multi-sig Proposal Builders"
+    description: "Shared simulation engine for proposal validation"
 
 machine_instructions:
-  - "Generate full Next.js 15 scaffold with Zustand store"
-  - "Implement recursive SVG permission tree with keyboard nav"
-  - "Add pure JS threshold engine with 8+ safety rules"
-  - "Include WharfKit session example for live proposal"
+  - "Generate full Next.js 15 scaffold with Zustand store and TypeScript strict mode"
+  - "Implement recursive SVG permission tree with keyboard navigation and drag support"
+  - "Create pure JavaScript threshold engine with at least 10 safety rules"
+  - "Add live multi-sig simulation UI with risk level indicators"
+  - "Include WharfKit session example for proposing permission changes on-chain"
+  - "Add accessibility features: reduced motion, ARIA labels, keyboard nav"
+  - "Apply retro-pixel glassmorphic CRT aesthetic using custom CSS variables"
+
+extension_guidance:
+  - "To add new permission types, extend the PermissionNode interface and update the rendering logic"
+  - "To support new chains, abstract the data fetching layer in lib/waxRpc.ts"
+  - "To change the visual style, modify the CSS variables in globals.css"
+  - "To add new safety rules, extend the validateProposedChange function"
+
+future_roadmap_ideas:
+  - On-chain permission change simulation with fee estimation
+  - Batch permission auditing across multiple accounts
+  - Integration with hardware wallet signing flows
+  - Advanced visual diff for permission changes
+  - Export permission structure as diagrams or reports
 ```
 
 ---
@@ -373,4 +451,4 @@ All share the same spec.yaml pattern for instant cross-tool integration.
 MIT License — Built with ❤️ for safer Antelope permission management.
 Pixel Journey — Beautiful interfaces for public blockchain data.
 
-*Last updated: July 02, 2026 — Deep Technical Decisions Refinement Pass*
+*Last updated: July 02, 2026 — Deep Machine/AI Readiness Refinement Pass*
