@@ -225,25 +225,46 @@ wax-permission-visualizer-and-editor/
 
 ---
 
-## 5. Core Implementation (Production-Ready Annotated Code)
+## 5. Core Implementation — Production-Ready & Educational Code
 
-### 5.1 Strict Types (lib/types.ts)
+All code is written with two goals in mind:
+1. **It must work reliably** in production.
+2. **It must teach** good patterns to developers who read it.
+
+### 5.1 Strict Type Definitions (lib/types.ts)
+
+These types form the foundation of the entire system. They are designed to be both strict and expressive.
+
 ```ts
 // lib/types.ts
+
+export interface PermissionKey {
+  key: string;
+  weight: number;
+}
+
+export interface LinkedAccount {
+  permission: {
+    actor: string;
+    permission: string;
+  };
+  weight: number;
+}
+
 export interface PermissionNode {
-  name: string;
-  threshold: number;
-  keys: Array<{ key: string; weight: number }>;
-  accounts: Array<{ permission: { actor: string; permission: string }; weight: number }>;
-  children?: PermissionNode[];
-  parent?: string;
+  name: string;                    // 'owner', 'active', 'custom', etc.
+  threshold: number;               // Minimum weight required to execute
+  keys: PermissionKey[];           // Keys with their weights
+  accounts: LinkedAccount[];       // Linked accounts/permissions
+  children?: PermissionNode[];     // Child permissions (for tree structure)
+  parent?: string;                 // Parent permission name
 }
 
 export interface PermissionGraph {
-  account: string;
+  account: string;                 // The WAX account being visualized
   permissions: Record<string, PermissionNode>;
   lastUpdated: string;
-  onChainHash?: string;
+  onChainHash?: string;            // Optional hash for verification
 }
 
 export interface SimulationResult {
@@ -256,9 +277,19 @@ export interface SimulationResult {
 }
 ```
 
-### 5.2 Permission Engine — Pure Client-Side Threshold Math (lib/permissionEngine.ts)
+### 5.2 Permission Engine — Core Logic with Safety Rules (lib/permissionEngine.ts)
+
+This is the heart of the system. It contains pure, testable logic for threshold calculation and safety validation.
+
 ```ts
 // lib/permissionEngine.ts
+
+import { PermissionNode, PermissionGraph, SimulationResult } from './types';
+
+/**
+ * Calculates whether a set of provided keys can satisfy a permission's threshold.
+ * This is pure logic - no side effects, fully testable.
+ */
 export function calculateThreshold(
   permission: PermissionNode,
   providedKeys: string[]
@@ -267,7 +298,7 @@ export function calculateThreshold(
   const satisfiedKeys: string[] = [];
   const warnings: string[] = [];
 
-  // Key matching
+  // Match provided keys against permission keys
   permission.keys.forEach(k => {
     if (providedKeys.includes(k.key)) {
       currentWeight += k.weight;
@@ -278,12 +309,32 @@ export function calculateThreshold(
   const canExecute = currentWeight >= permission.threshold;
   const missingWeight = Math.max(0, permission.threshold - currentWeight);
 
+  // === Safety Rules ===
+
+  // Rule 1: Owner permission with missing weight is critical
   if (permission.name === 'owner' && missingWeight > 0) {
-    warnings.push('CRITICAL: Owner permission cannot be recovered if all keys are lost');
+    warnings.push('CRITICAL: Owner permission cannot be recovered if all keys are lost. Consider adding backup keys.');
   }
+
+  // Rule 2: No matching keys at all
   if (currentWeight === 0 && permission.keys.length > 0) {
-    warnings.push('No matching keys provided — this action will fail');
+    warnings.push('No matching keys provided — this action will fail on-chain.');
   }
+
+  // Rule 3: Threshold higher than total available weight
+  const totalAvailableWeight = permission.keys.reduce((sum, k) => sum + k.weight, 0);
+  if (permission.threshold > totalAvailableWeight) {
+    warnings.push('Warning: Threshold is higher than total available key weight. Some actions may be impossible.');
+  }
+
+  // Rule 4: Very high threshold relative to keys (potential governance issue)
+  if (permission.keys.length > 0 && permission.threshold > totalAvailableWeight * 0.8) {
+    warnings.push('Note: High threshold may make coordination difficult in multi-sig setups.');
+  }
+
+  const riskLevel: 'safe' | 'warning' | 'danger' =
+    missingWeight === 0 ? 'safe' :
+    missingWeight <= 1 ? 'warning' : 'danger';
 
   return {
     canExecute,
@@ -291,58 +342,92 @@ export function calculateThreshold(
     missingWeight,
     satisfiedKeys,
     warnings,
-    riskLevel: missingWeight === 0 ? 'safe' : missingWeight < 2 ? 'warning' : 'danger'
+    riskLevel
   };
 }
 
-// Additional 8+ safety rules (full file in repo)
-export function validateProposedChange(current: PermissionGraph, proposed: PermissionGraph): string[] {
+/**
+ * Validates a proposed permission change before it is applied.
+ * Returns a list of warnings/errors.
+ */
+export function validateProposedChange(
+  current: PermissionGraph,
+  proposed: PermissionGraph
+): string[] {
   const warnings: string[] = [];
+
+  const currentOwner = current.permissions['owner'];
+  const proposedOwner = proposed.permissions['owner'];
+
   // Rule: Cannot reduce owner threshold below 1 if keys exist
-  // Rule: Active cannot modify owner
-  // Rule: Total weight must always >= threshold
-  // ... (full implementation committed)
+  if (proposedOwner && proposedOwner.threshold < 1 && proposedOwner.keys.length > 0) {
+    warnings.push('Cannot set owner threshold below 1 while keys exist.');
+  }
+
+  // Rule: Active permission should never be able to modify owner
+  // (This is more of a conceptual check - actual enforcement is on-chain)
+  const activeCanModifyOwner = proposed.permissions['active']?.accounts?.some(
+    acc => acc.permission.permission === 'owner'
+  );
+  if (activeCanModifyOwner) {
+    warnings.push('DANGER: Active permission appears to have authority over owner. This is extremely dangerous.');
+  }
+
   return warnings;
 }
 ```
 
-### 5.3 Interactive SVG Permission Tree (components/PermissionTree.tsx — Core)
+### 5.3 Interactive SVG Permission Tree (components/PermissionTree.tsx)
+
+The visual heart of the application. Built with accessibility and educational clarity in mind.
+
 ```tsx
 'use client';
+
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { PermissionNode, PermissionGraph } from '@/lib/types';
 
-interface Props {
+interface PermissionTreeProps {
   graph: PermissionGraph;
   mode: 'viewer' | 'editor';
   onUpdate?: (nodeName: string, action: string, payload?: any) => void;
 }
 
-export function PermissionTree({ graph, mode, onUpdate }: Props) {
+export function PermissionTree({ graph, mode, onUpdate }: PermissionTreeProps) {
   const [selected, setSelected] = useState<string | null>(null);
 
-  // Recursive SVG tree renderer (lightweight, pixel-perfect, keyboard accessible)
-  const renderNode = (node: PermissionNode, x: number, y: number, level: number) => {
+  const renderNode = (node: PermissionNode, x: number, y: number) => {
     const isSelected = selected === node.name;
+
     return (
       <g key={node.name} onClick={() => setSelected(node.name)} className="cursor-pointer">
-        <foreignObject x={x} y={y} width="240" height="160">
-          <div className={`glassmorphic-crt pixel-border p-3 text-xs transition-all ${isSelected ? 'ring-2 ring-emerald-400' : ''}`}>
-            <div className="font-press-start text-[10px] mb-1 tracking-widest">{node.name.toUpperCase()}</div>
-            <div className="flex justify-between text-[10px]">
-              <span>Threshold</span>
-              <span className="text-emerald-400 font-mono">{node.threshold}</span>
+        <foreignObject x={x} y={y} width="260" height="180">
+          <div 
+            className={`glassmorphic-crt pixel-border p-3 text-xs transition-all ${isSelected ? 'ring-2 ring-emerald-400' : ''}`}
+          >
+            <div className="font-press-start text-[10px] mb-1 tracking-widest text-emerald-400">
+              {node.name.toUpperCase()}
             </div>
+            
+            <div className="flex justify-between text-[10px] mb-1">
+              <span className="opacity-70">Threshold</span>
+              <span className="font-mono text-emerald-400">{node.threshold}</span>
+            </div>
+
             {node.keys.map((k, i) => (
-              <div key={i} className="flex justify-between text-[9px] opacity-80 mt-0.5">
-                <span>{k.key.slice(0, 10)}…</span>
+              <div key={i} className="flex justify-between text-[9px] opacity-80">
+                <span className="font-mono truncate">{k.key.slice(0, 12)}…</span>
                 <span className="text-amber-400">{k.weight}</span>
               </div>
             ))}
+
             {mode === 'editor' && (
-              <button 
-                onClick={(e) => { e.stopPropagation(); onUpdate?.(node.name, 'addKey'); }}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onUpdate?.(node.name, 'addKey');
+                }}
                 className="mt-2 text-[9px] underline hover:text-emerald-400"
               >
                 + ADD KEY
@@ -351,13 +436,18 @@ export function PermissionTree({ graph, mode, onUpdate }: Props) {
           </div>
         </foreignObject>
 
-        {/* Retro dashed connecting lines */}
+        {/* Connecting lines */}
         {node.children?.map((child, idx) => (
-          <line 
+          <line
             key={idx}
-            x1={x + 120} y1={y + 80}
-            x2={x + (idx - 1) * 260 + 120} y2={y + 170}
-            stroke="#22c55e" strokeWidth="1" strokeDasharray="3 2" opacity="0.6"
+            x1={x + 130}
+            y1={y + 90}
+            x2={x + (idx - 2) * 280 + 130}
+            y2={y + 200}
+            stroke="#22c55e"
+            strokeWidth="1.5"
+            strokeDasharray="4 2"
+            opacity="0.5"
           />
         ))}
       </g>
@@ -365,16 +455,20 @@ export function PermissionTree({ graph, mode, onUpdate }: Props) {
   };
 
   return (
-    <svg width="100%" height="620" className="bg-black/70 rounded-2xl border border-white/10">
+    <svg width="100%" height="680" className="bg-black/70 rounded-2xl border border-white/10">
       {Object.values(graph.permissions).map((node, i) => 
-        renderNode(node, 60 + i * 280, 40, 0)
+        renderNode(node, 80 + i * 300, 60)
       )}
     </svg>
   );
 }
 ```
 
-*(Full component with drag-to-reorder, keyboard navigation, and Canvas overlay for precision lines committed in repo)*
+**Note:** The full component in the repository includes additional features such as:
+- Keyboard navigation (arrow keys + Enter)
+- Drag to reorder (in editor mode)
+- Canvas overlay for precise connecting lines
+- Better mobile touch support
 
 ---
 
@@ -451,4 +545,4 @@ All share the same spec.yaml pattern for instant cross-tool integration.
 MIT License — Built with ❤️ for safer Antelope permission management.
 Pixel Journey — Beautiful interfaces for public blockchain data.
 
-*Last updated: July 02, 2026 — Deep Machine/AI Readiness Refinement Pass*
+*Last updated: July 02, 2026 — Deep Code Implementation Refinement Pass*
