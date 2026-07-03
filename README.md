@@ -9,6 +9,19 @@
 
 ---
 
+## Production Readiness Checklist
+
+- [ ] Clear visual permission tree with keyboard and screen reader support
+- [ ] Live threshold simulation with actionable safety warnings
+- [ ] Safe preview mode before any on-chain changes
+- [ ] Graceful error handling for RPC failures and invalid accounts
+- [ ] Accessibility: reduced motion, high contrast, ARIA labels
+- [ ] Performance: smooth 60fps interactions on mid-range devices
+- [ ] Examples demonstrate full composition and integration patterns
+- [ ] Documentation explains how to embed or extend the tool
+
+---
+
 ## 1. Educational Core — Why Permissions Matter (Deep Dive)
 
 The Antelope permission model is simultaneously one of the most powerful and one of the most dangerous features in blockchain. A single misconfigured threshold, a lost owner key, or an overly permissive `active` key can result in permanent loss of funds with almost no recovery path.
@@ -208,7 +221,7 @@ wax-permission-visualizer-and-editor/
 ├── components/
 │   ├── PermissionTree.tsx         # Core interactive SVG + Canvas visualizer/editor
 │   ├── PermissionDetailPanel.tsx
-│   ├── ThresholdSimulator.tsx     # Live M-of-N safety engine UI
+│   ├── ThresholdSimulator.tsx     # Live multi-sig threshold simulation UI
 │   └── AccountInput.tsx
 ├── lib/
 │   ├── types.ts                   # Strict PermissionNode, Graph, SimulationResult
@@ -547,4 +560,4 @@ All share the same spec.yaml pattern for instant cross-tool integration.
 MIT License — Built with ❤️ for safer Antelope permission management.
 Pixel Journey — Beautiful interfaces for public blockchain data.
 
-*Last updated: July 02, 2026 — Accelerated Deep Refinement Pass*
+*Last updated: July 03, 2026*
