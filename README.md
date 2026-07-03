@@ -22,6 +22,18 @@
 
 ---
 
+## Examples Folder
+
+This repository includes a dedicated `/examples` folder with reusable components:
+
+- `PermissionTree.tsx` — Clean, interactive permission tree visualizer
+- `ThresholdSimulator.tsx` — Standalone threshold calculation component
+- `PermissionTreePreview.tsx` — Simple preview version of the tree
+
+These are designed to be easy to copy into other projects.
+
+---
+
 ## 1. Educational Core — Why Permissions Matter (Deep Dive)
 
 The Antelope permission model is simultaneously one of the most powerful and one of the most dangerous features in blockchain. A single misconfigured threshold, a lost owner key, or an overly permissive `active` key can result in permanent loss of funds with almost no recovery path.
