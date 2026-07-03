@@ -24,13 +24,13 @@
 
 ## Examples Folder
 
-This repository includes a dedicated `/examples` folder with reusable components:
+This repository includes a dedicated `/examples` folder with reusable components focused on Permission Tree Visualization:
 
-- `PermissionTree.tsx` — Clean, interactive permission tree visualizer
+- `PermissionTree.tsx` — **Enhanced interactive tree** with editing, threshold changes, and key management
 - `ThresholdSimulator.tsx` — Standalone threshold calculation component
-- `PermissionTreePreview.tsx` — Simple preview version of the tree
+- `PermissionTreePreview.tsx` — Simple preview version
 
-These are designed to be easy to copy into other projects.
+These are designed to be easy to copy and extend.
 
 ---
 
