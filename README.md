@@ -34,6 +34,7 @@ This repository includes a dedicated `/examples` folder with reusable components
 - `WharfKitIntegrationExample.tsx` — Example of connecting to WharfKit for on-chain actions
 - `PermissionExport.tsx` — Export permission structures as JSON or YAML
 - `PermissionPolicyChecker.tsx` — Demonstrates how contracts validate permissions
+- `CommonPermissionTemplates.tsx` — Common permission structure templates for quick starts
 - `ThresholdSimulator.tsx` — Standalone threshold calculation
 - `PermissionTreePreview.tsx` — Simple preview version
 
