@@ -155,6 +155,7 @@ This repository includes a dedicated `/examples` folder with reusable components
 - `PermissionWeightVisualizer.tsx` — Visual overview of weights vs threshold
 - `PermissionRiskSummary.tsx` — Quick overall risk summary for a permission structure
 - `PermissionStructureRecommendations.tsx` — Recommended structures for different use cases
+- `PermissionBestPracticesChecklist.tsx` — Best practices checklist for permission management
 - `CommonPermissionTemplates.tsx` — Common permission structure templates for quick starts
 - `ThresholdSimulator.tsx` — Standalone threshold calculation
 - `PermissionTreePreview.tsx` — Simple preview version
