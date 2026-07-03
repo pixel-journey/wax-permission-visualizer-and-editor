@@ -31,6 +31,7 @@ This repository includes a dedicated `/examples` folder with reusable components
 - `PermissionDiffViewer.tsx` — Before/after comparison for permission changes
 - `MultiSigSimulationPreview.tsx` — Multi-sig approval simulation (great for DAOs and governance)
 - `LinkedPermissionExample.tsx` — Examples of linked permissions for smart contracts
+- `WharfKitIntegrationExample.tsx` — Example of connecting to WharfKit for on-chain actions
 - `ThresholdSimulator.tsx` — Standalone threshold calculation
 - `PermissionTreePreview.tsx` — Simple preview version
 
