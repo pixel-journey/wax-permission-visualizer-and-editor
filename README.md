@@ -31,6 +31,99 @@ This focused scope allows us to go deep where it matters most while keeping the 
 
 ---
 
+## Permission Scopes & Linked Permissions (Deep Dive)
+
+One of the most powerful — and frequently underused — features of the Antelope permission model is the ability to **scope** (or "link") permissions to specific contracts and actions.
+
+### What Are Permission Scopes?
+
+By default, a permission like `active` can be used to authorize **any** action on **any** contract. This is very flexible but also dangerous.
+
+**Linked permissions** (also called scoped permissions) allow you to restrict a permission so that it can **only** be used for specific contracts and actions.
+
+Example:
+- Without scoping: `myaccount@active` can call anything.
+- With scoping: `myaccount@transfer` can **only** call `eosio.token::transfer`.
+
+This dramatically reduces the attack surface and is one of the best ways to build secure systems on WAX.
+
+### Why Scopes Matter So Much
+
+| Without Scoping                          | With Proper Linked Permissions                  | Security Impact                          |
+|------------------------------------------|--------------------------------------------------|------------------------------------------|
+| Any contract can abuse the permission    | Only the intended action can be called           | Much lower risk of smart contract abuse  |
+| High-value actions share the same key    | Sensitive actions require specific permissions   | Better protection for treasuries & users |
+| Hard to audit what a permission can do   | Clear, explicit scope                            | Easier to reason about and audit         |
+| Easy to make dangerous mistakes          | Mistakes are more contained                      | Safer overall permission design          |
+
+### How Linked Permissions Work
+
+You create a linked permission in two steps:
+
+1. Create a new permission (or reuse an existing one).
+2. Link it to a specific contract + action.
+
+```bash
+# 1. Create the 'transfer' permission
+cleos set account permission myaccount transfer \
+  '{"threshold":1,"keys":[{"key":"PUBKEY","weight":1}],"accounts":[],"waits":[]}' active -p myaccount@active
+
+# 2. Link it so it can ONLY call transfer on eosio.token
+cleos set action permission myaccount eosio.token transfer transfer
+```
+
+After this, `myaccount@transfer` is **only** valid for `eosio.token::transfer`. It cannot be used for anything else.
+
+### Using Scopes in Smart Contracts
+
+Contracts can enforce specific permission levels using:
+
+```cpp
+void mycontract::withdraw(name user, asset amount) {
+    // Only allows calls authorized with the 'transfer' permission
+    require_auth(permission_level{user, "transfer"_n});
+    // ... business logic
+}
+```
+
+If someone tries to call this with only the generic `active` permission (without the link), the transaction will fail.
+
+### Common Patterns
+
+| Pattern                        | Recommended Scope                              | Use Case                              |
+|--------------------------------|------------------------------------------------|---------------------------------------|
+| `transfer` permission          | `eosio.token::transfer` (or specific token)    | Token transfers & withdrawals         |
+| `claim` permission             | Game/reward contract + claim action            | Games, airdrops, staking rewards      |
+| `publish` permission           | Content/social contract + publish action       | Social platforms, content creation    |
+| `admin` permission             | Specific admin actions only                    | DAO tooling, protocol configuration   |
+
+### Anti-Patterns to Avoid
+
+| Anti-Pattern                              | Risk                                      | Recommendation                                      |
+|-------------------------------------------|-------------------------------------------|-----------------------------------------------------|
+| Using only generic `active` for everything | Very large attack surface                 | Create specific linked permissions for sensitive actions |
+| Creating linked permissions that are too broad | Still dangerous                           | Scope as narrowly as possible (ideally one contract + action) |
+| Not documenting which actions require which permission | Confusion and mistakes in frontend     | Clearly communicate permission requirements to users |
+| Linking high-value actions to weak permissions | Funds can be drained easily              | Use appropriate thresholds + multi-sig where needed |
+
+### How This Visualizer Helps With Scopes
+
+- The interactive permission tree clearly shows which permissions are linked and to what.
+- The risk analyzer can flag overly broad or missing links.
+- The `LinkedPermissionExample.tsx` component helps developers understand proper scoping patterns.
+- You can safely design and preview scoped permission structures before broadcasting changes.
+
+### Best Practices for Permission Scopes
+
+1. **Always use linked permissions** for any action that moves value or has high impact.
+2. **Scope as narrowly as possible** — ideally to a single contract + single action.
+3. **Document permission requirements** clearly in your dApp and smart contract.
+4. **Use the visualizer** before making changes involving scopes.
+5. **Test thoroughly** with both single-key and multi-sig accounts.
+6. **Regularly audit** linked permissions as your project evolves.
+
+---
+
 ## Production Readiness Checklist
 
 - [ ] Clear visual permission tree with keyboard and screen reader support
@@ -639,7 +732,6 @@ interface PermissionTreeProps {
   mode: 'viewer' | 'editor';
   onUpdate?: (nodeName: string, action: string, payload?: any) => void;
 }
-
 export function PermissionTree({ graph, mode, onUpdate }: PermissionTreeProps) {
   const [selected, setSelected] = useState<string | null>(null);
 
