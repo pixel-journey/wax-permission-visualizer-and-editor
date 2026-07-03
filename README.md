@@ -30,6 +30,7 @@ This repository includes a dedicated `/examples` folder with reusable components
 - `PermissionRiskAnalyzer.tsx` — Clean risk and warning display component
 - `PermissionDiffViewer.tsx` — Before/after comparison for permission changes
 - `MultiSigSimulationPreview.tsx` — Multi-sig approval simulation (great for DAOs and governance)
+- `LinkedPermissionExample.tsx` — Examples of linked permissions for smart contracts
 - `ThresholdSimulator.tsx` — Standalone threshold calculation
 - `PermissionTreePreview.tsx` — Simple preview version
 
@@ -126,6 +127,38 @@ This section provides a detailed catalog of dangerous permission patterns on WAX
 - The risk analyzer automatically surfaces critical warnings.
 - The diff viewer lets you preview changes before broadcasting.
 - The simulation tools show whether a proposal can actually execute.
+
+---
+
+## Permission Best Practices by Use Case
+
+Different types of projects have different permission needs. Here are recommended approaches for common categories.
+
+### Games & Play-to-Earn
+
+- Use linked `claim` / `reward` permissions for reward distribution.
+- Keep player `active` permission relatively open for smooth gameplay.
+- Use multi-sig or higher thresholds for treasury and admin actions.
+- Provide clear in-game guidance on which actions require which permissions.
+
+### DAOs & Governance
+
+- Strong multi-sig on `owner` with clear, documented thresholds.
+- Separate permissions for proposal creation vs execution.
+- Use the visualizer and simulation tools before every governance change.
+- Regularly audit permission structure as membership changes.
+
+### Token Projects & Marketplaces
+
+- Use specific linked `transfer` permissions.
+- Consider time-locked or multi-sig requirements for large withdrawals.
+- Provide clear documentation for integrators on required permissions.
+
+### Infrastructure & Tooling
+
+- Very conservative permission structures.
+- Strong emphasis on recoverability and auditability.
+- Provide excellent tooling (like this visualizer) to help users manage permissions safely.
 
 ---
 
