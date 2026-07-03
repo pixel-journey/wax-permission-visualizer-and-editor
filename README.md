@@ -29,6 +29,7 @@ This repository includes a dedicated `/examples` folder with reusable components
 - `PermissionTree.tsx` — **Enhanced interactive tree** with full editing support (add/remove keys, change thresholds)
 - `PermissionRiskAnalyzer.tsx` — Clean risk and warning display component
 - `PermissionDiffViewer.tsx` — Before/after comparison for permission changes
+- `MultiSigSimulationPreview.tsx` — Multi-sig approval simulation (great for DAOs and governance)
 - `ThresholdSimulator.tsx` — Standalone threshold calculation
 - `PermissionTreePreview.tsx` — Simple preview version
 
@@ -94,6 +95,37 @@ Use the `PermissionRiskAnalyzer` component to surface warnings automatically.
 - Use multi-sig or higher thresholds for treasury/admin actions
 - Provide clear frontend guidance on which permission is needed for each action
 - Regularly audit permission usage as the project evolves
+
+---
+
+## Anti-Patterns & Security Risks (Deep Dive)
+
+This section provides a detailed catalog of dangerous permission patterns on WAX/Antelope, why they are risky, and how to avoid or detect them.
+
+### Critical Anti-Patterns
+
+| Anti-Pattern | Description | Risk Level | How to Detect | How to Fix |
+|--------------|-------------|------------|---------------|------------|
+| **Active controls Owner** | The `active` permission has authority to modify `owner` | Critical | Visual tree shows `active` linked to `owner` | Remove the link immediately. `active` should never control `owner`. |
+| **Owner has zero recoverable keys** | No keys with meaningful weight on `owner` | Critical | `owner` threshold > total key weight | Add backup keys or reduce threshold before it's too late. |
+| **Threshold higher than total weight** | Proposal can never execute | High | Simulation shows insufficient weight | Lower threshold or add more keys/weight. |
+| **Overly permissive linked permissions** | Any contract can call sensitive actions | High | Linked permission has broad actor scope | Scope the linked permission to specific contracts/actions. |
+| **Single key controls high-value permission** | No multi-sig on treasury or admin actions | High | Visual tree shows single key with full weight | Add multi-sig structure with reasonable threshold. |
+| **No separation between daily and high-risk actions** | `active` can do everything | Medium-High | All actions use generic `active` | Create specific linked permissions for high-impact actions. |
+
+### Why These Patterns Are So Dangerous on WAX
+
+- Permission changes are often irreversible without the `owner` key.
+- Smart contracts can be abused if linked permissions are too broad.
+- Multi-sig mistakes can permanently lock funds.
+- Most users and even many developers underestimate these risks until it's too late.
+
+### How the Visualizer Helps Prevent These Issues
+
+- The interactive tree makes dangerous relationships visible at a glance.
+- The risk analyzer automatically surfaces critical warnings.
+- The diff viewer lets you preview changes before broadcasting.
+- The simulation tools show whether a proposal can actually execute.
 
 ---
 
