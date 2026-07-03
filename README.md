@@ -28,10 +28,72 @@ This repository includes a dedicated `/examples` folder with reusable components
 
 - `PermissionTree.tsx` — **Enhanced interactive tree** with full editing support (add/remove keys, change thresholds)
 - `PermissionRiskAnalyzer.tsx` — Clean risk and warning display component
+- `PermissionDiffViewer.tsx` — Before/after comparison for permission changes
 - `ThresholdSimulator.tsx` — Standalone threshold calculation
 - `PermissionTreePreview.tsx` — Simple preview version
 
 These components are designed to be copy-paste friendly and educational.
+
+---
+
+## Common Workflows
+
+This section covers the most important real-world workflows when working with permissions on WAX.
+
+### 1. Safely Setting Up a Multi-Sig Account
+
+**Goal**: Create a secure multi-sig structure without locking yourself out.
+
+**Recommended Steps**:
+
+1. Start with a single `owner` key you fully control.
+2. Add additional trusted keys or accounts to `owner` with appropriate weights.
+3. Set a reasonable threshold (e.g. 2-of-3 or 3-of-5).
+4. **Never** remove your last controlling key until the new structure is fully tested.
+5. Use the Permission Visualizer to preview the structure before broadcasting.
+6. Test with a small transaction first.
+
+**Common Mistake**: Setting the threshold higher than the total weight of keys you control.
+
+### 2. Rotating Keys Safely
+
+**Goal**: Replace compromised or old keys without losing access.
+
+**Recommended Steps**:
+
+1. Add the new key to the relevant permission(s) first.
+2. Verify the new key works by signing a test transaction.
+3. Only then remove the old key.
+4. Use the visual diff tool to confirm the change looks correct.
+5. Update any off-chain records or backup systems.
+
+**Tool Support**: The `PermissionDiffViewer` component is ideal for previewing key rotation changes.
+
+### 3. Auditing an Existing Account
+
+**Goal**: Identify dangerous or fragile permission setups.
+
+**What to Check**:
+
+- Is the `owner` permission recoverable? (At least 1–2 keys with reasonable weights)
+- Does `active` have authority over `owner`? (Major red flag)
+- Are thresholds reasonable relative to total weight?
+- Are there overly permissive linked permissions?
+- Are high-value actions protected by specific permissions?
+
+Use the `PermissionRiskAnalyzer` component to surface warnings automatically.
+
+### 4. Designing Permissions for a Game or dApp
+
+**Goal**: Create safe, usable permission structures for players and the project.
+
+**Recommended Approach**:
+
+- Use linked permissions for high-impact actions (`transfer`, `claim`, `stake`, etc.)
+- Keep `active` relatively permissive for daily use
+- Use multi-sig or higher thresholds for treasury/admin actions
+- Provide clear frontend guidance on which permission is needed for each action
+- Regularly audit permission usage as the project evolves
 
 ---
 
