@@ -109,7 +109,7 @@ If someone tries to call this with only the generic `active` permission (without
 ### How This Visualizer Helps With Scopes
 
 - The interactive permission tree clearly shows which permissions are linked and to what.
-- The risk analyzer can flag overly broad or missing links.
+- The risk analyzer automatically surfaces critical warnings.
 - The `LinkedPermissionExample.tsx` component helps developers understand proper scoping patterns.
 - You can safely design and preview scoped permission structures before broadcasting changes.
 
@@ -153,6 +153,7 @@ This repository includes a dedicated `/examples` folder with reusable components
 - `SmartContractPermissionPatterns.tsx` — Common require_auth patterns with security levels
 - `PermissionAuditChecklist.tsx` — Checklist for systematically auditing permission structures
 - `PermissionWeightVisualizer.tsx` — Visual overview of weights vs threshold
+- `PermissionRiskSummary.tsx` — Quick overall risk summary for a permission structure
 - `PermissionStructureRecommendations.tsx` — Recommended structures for different use cases
 - `CommonPermissionTemplates.tsx` — Common permission structure templates for quick starts
 - `ThresholdSimulator.tsx` — Standalone threshold calculation
