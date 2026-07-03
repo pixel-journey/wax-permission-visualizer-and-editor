@@ -150,6 +150,7 @@ This repository includes a dedicated `/examples` folder with reusable components
 - `PermissionExport.tsx` — Export permission structures as JSON or YAML
 - `PermissionPolicyChecker.tsx` — Demonstrates how contracts validate permissions
 - `ScopeImpactSimulator.tsx` — Shows the security impact of using (or not using) permission scopes
+- `SmartContractPermissionPatterns.tsx` — Common require_auth patterns with security levels
 - `CommonPermissionTemplates.tsx` — Common permission structure templates for quick starts
 - `ThresholdSimulator.tsx` — Standalone threshold calculation
 - `PermissionTreePreview.tsx` — Simple preview version
@@ -595,7 +596,293 @@ export interface LinkedAccount {
 export interface PermissionNode {
   name: string;                    // 'owner', 'active', 'custom', etc.
   threshold: number;               // Minimum weight required to execute
-  keys: PermissionKey[];           | Key files and implementation sections remain the same as previous version for brevity in this response. |
+  keys: PermissionKey[];           // Keys with their weights
+  accounts: LinkedAccount[];       // Linked accounts/permissions
+  children?: PermissionNode[];     // Child permissions (for tree structure)
+  parent?: string;                 // Parent permission name
+}
+
+export interface PermissionGraph {
+  account: string;                 // The WAX account being visualized
+  permissions: Record<string, PermissionNode>;
+  lastUpdated: string;
+  onChainHash?: string;            // Optional hash for verification
+}
+
+export interface SimulationResult {
+  canExecute: boolean;
+  currentWeight: number;
+  missingWeight: number;
+  satisfiedKeys: string[];
+  warnings: string[];
+  riskLevel: 'safe' | 'warning' | 'danger';
+}
+```
+
+### 5.2 Permission Engine — Core Logic with Safety Rules (lib/permissionEngine.ts)
+
+This is the heart of the system. It contains pure, testable logic for threshold calculation and safety validation.
+
+```ts
+// lib/permissionEngine.ts
+
+import { PermissionNode, PermissionGraph, SimulationResult } from './types';
+
+/**
+ * Calculates whether a set of provided keys can satisfy a permission's threshold.
+ * This is pure logic - no side effects, fully testable.
+ */
+export function calculateThreshold(
+  permission: PermissionNode,
+  providedKeys: string[]
+): SimulationResult {
+  let currentWeight = 0;
+  const satisfiedKeys: string[] = [];
+  const warnings: string[] = [];
+
+  // Match provided keys against permission keys
+  permission.keys.forEach(k => {
+    if (providedKeys.includes(k.key)) {
+      currentWeight += k.weight;
+      satisfiedKeys.push(k.key);
+    }
+  });
+
+  const canExecute = currentWeight >= permission.threshold;
+  const missingWeight = Math.max(0, permission.threshold - currentWeight);
+
+  // === Safety Rules ===
+
+  // Rule 1: Owner permission with missing weight is critical
+  if (permission.name === 'owner' && missingWeight > 0) {
+    warnings.push('CRITICAL: Owner permission cannot be recovered if all keys are lost. Consider adding backup keys.');
+  }
+
+  // Rule 2: No matching keys at all
+  if (currentWeight === 0 && permission.keys.length > 0) {
+    warnings.push('No matching keys provided — this action will fail on-chain.');
+  }
+
+  // Rule 3: Threshold higher than total available weight
+  const totalAvailableWeight = permission.keys.reduce((sum, k) => sum + k.weight, 0);
+  if (permission.threshold > totalAvailableWeight) {
+    warnings.push('Warning: Threshold is higher than total available key weight. Some actions may be impossible.');
+  }
+
+  // Rule 4: Very high threshold relative to keys (potential governance issue)
+  if (permission.keys.length > 0 && permission.threshold > totalAvailableWeight * 0.8) {
+    warnings.push('Note: High threshold may make coordination difficult in multi-sig setups.');
+  }
+
+  const riskLevel: 'safe' | 'warning' | 'danger' =
+    missingWeight === 0 ? 'safe' :
+    missingWeight <= 1 ? 'warning' : 'danger';
+
+  return {
+    canExecute,
+    currentWeight,
+    missingWeight,
+    satisfiedKeys,
+    warnings,
+    riskLevel
+  };
+}
+
+/**
+ * Validates a proposed permission change before it is applied.
+ * Returns a list of warnings/errors.
+ */
+export function validateProposedChange(
+  current: PermissionGraph,
+  proposed: PermissionGraph
+): string[] {
+  const warnings: string[] = [];
+
+  const currentOwner = current.permissions['owner'];
+  const proposedOwner = proposed.permissions['owner'];
+
+  // Rule: Cannot reduce owner threshold below 1 if keys exist
+  if (proposedOwner && proposedOwner.threshold < 1 && proposedOwner.keys.length > 0) {
+    warnings.push('Cannot set owner threshold below 1 while keys exist.');
+  }
+
+  // Rule: Active permission should never be able to modify owner
+  const activeCanModifyOwner = proposed.permissions['active']?.accounts?.some(
+    acc => acc.permission.permission === 'owner'
+  );
+  if (activeCanModifyOwner) {
+    warnings.push('DANGER: Active permission appears to have authority over owner. This is extremely dangerous.');
+  }
+
+  return warnings;
+}
+```
+
+### 5.3 Interactive SVG Permission Tree (components/PermissionTree.tsx)
+
+The visual heart of the application. Built with accessibility and educational clarity in mind.
+
+```tsx
+'use client';
+
+import { useState } from 'react';
+import { motion } from 'framer-motion';
+import { PermissionNode, PermissionGraph } from '@/lib/types';
+
+interface PermissionTreeProps {
+  graph: PermissionGraph;
+  mode: 'viewer' | 'editor';
+  onUpdate?: (nodeName: string, action: string, payload?: any) => void;
+}
+
+export function PermissionTree({ graph, mode, onUpdate }: PermissionTreeProps) {
+  const [selected, setSelected] = useState<string | null>(null);
+
+  const renderNode = (node: PermissionNode, x: number, y: number) => {
+    const isSelected = selected === node.name;
+
+    return (
+      <g key={node.name} onClick={() => setSelected(node.name)} className="cursor-pointer">
+        <foreignObject x={x} y={y} width="260" height="180">
+          <div 
+            className={`glassmorphic-crt pixel-border p-3 text-xs transition-all ${isSelected ? 'ring-2 ring-emerald-400' : ''}`}
+          >
+            <div className="font-press-start text-[10px] mb-1 tracking-widest text-emerald-400">
+              {node.name.toUpperCase()}
+            </div>
+            
+            <div className="flex justify-between text-[10px] mb-1">
+              <span className="opacity-70">Threshold</span>
+              <span className="font-mono text-emerald-400">{node.threshold}</span>
+            </div>
+
+            {node.keys.map((k, i) => (
+              <div key={i} className="flex justify-between text-[9px] opacity-80">
+                <span className="font-mono truncate">{k.key.slice(0, 12)}…</span>
+                <span className="text-amber-400">{k.weight}</span>
+              </div>
+            ))}
+
+            {mode === 'editor' && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onUpdate?.(node.name, 'addKey');
+                }}
+                className="mt-2 text-[9px] underline hover:text-emerald-400"
+              >
+                + ADD KEY
+              </button>
+            )}
+          </div>
+        </foreignObject>
+
+        {/* Connecting lines */}
+        {node.children?.map((child, idx) => (
+          <line
+            key={idx}
+            x1={x + 130}
+            y1={y + 90}
+            x2={x + (idx - 2) * 280 + 130}
+            y2={y + 200}
+            stroke="#22c55e"
+            strokeWidth="1.5"
+            strokeDasharray="4 2"
+            opacity="0.5"
+          />
+        ))}
+      </g>
+    );
+  };
+
+  return (
+    <svg width="100%" height="680" className="bg-black/70 rounded-2xl border border-white/10">
+      {Object.values(graph.permissions).map((node, i) => 
+        renderNode(node, 80 + i * 300, 60)
+      )}
+    </svg>
+  );
+}
+```
+
+**Note:** The full component in the repository includes additional features such as keyboard navigation, drag-to-reorder, and better mobile support.
+
+---
+
+## 6. Visual Design, Theming & Accessibility (PX Standards)
+
+This blueprint follows the **Pixel Journey** design philosophy: beautiful retro-pixel aesthetics combined with modern accessibility standards.
+
+### Design System
+- **Primary aesthetic**: Retro-pixel + glassmorphic + subtle CRT scanlines
+- **Typography**: Press Start 2P for headers, system mono for data
+- **Color system**: Emerald accents on dark backgrounds with high contrast
+- **Motion**: Subtle, purposeful animations that respect `prefers-reduced-motion`
+
+### Accessibility Targets (WCAG 2.2 AA+)
+- Full keyboard navigation (arrow keys + Enter/Space)
+- ARIA labels and live regions for screen readers
+- High contrast ratios (minimum 4.5:1)
+- Reduced motion support
+- Optional haptics for threshold feedback
+- Voice label support for key actions
+
+### Theming Implementation
+Custom CSS variables allow easy theming while maintaining the retro-pixel feel:
+
+```css
+/* globals.css */
+:root {
+  --pixel-bg: #0a0a0a;
+  --pixel-glass: rgba(255,255,255,0.06);
+  --pixel-border: rgba(255,255,255,0.15);
+  --accent-emerald: #10b981;
+  --accent-amber: #fbbf24;
+}
+```
+
+---
+
+## 7. Developer Experience & Integration
+
+### Local Development
+```bash
+git clone https://github.com/pixel-journey/wax-permission-visualizer-and-editor.git
+cd wax-permission-visualizer-and-editor
+npm install
+npm run dev
+```
+
+### Integration Options
+- **Quick embed**: Drop the `PermissionTree` component into any Next.js app
+- **Full standalone mode**: Use the complete demo as a reference or starting point
+- **Library mode**: Import only the `permissionEngine` for pure logic usage
+- **AI-assisted**: Copy `spec.yaml` and paste into Claude/Grok/Cursor for instant extensions
+
+### Copy-Paste Ready Examples
+See Section 7 in the full README for multiple integration patterns.
+
+---
+
+## 8. Production Readiness & Future-Proofing
+
+- Strong safety rules and warnings throughout
+- Pure client-side logic (no smart contract risk)
+- Clear extension points documented in `spec.yaml`
+- Performance targets: < 1.5s initial load, smooth 60fps interactions
+- Error boundaries and graceful degradation planned for v1.1
+- Monitoring hooks prepared for future observability integration
+
+---
+
+## 9. Related Blueprints & Ecosystem Synergy
+
+This is **Tier 1 foundational security tooling**. Direct companions:
+- `wax-safe-key-rotation-assistant`
+- `wax-multi-sig-proposal-builder-and-simulator`
+- `wax-account-permission-auditor`
+
+All share the same spec.yaml pattern for instant cross-tool integration.
 
 ---
 
