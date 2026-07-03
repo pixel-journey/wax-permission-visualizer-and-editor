@@ -151,6 +151,7 @@ This repository includes a dedicated `/examples` folder with reusable components
 - `PermissionPolicyChecker.tsx` — Demonstrates how contracts validate permissions
 - `ScopeImpactSimulator.tsx` — Shows the security impact of using (or not using) permission scopes
 - `SmartContractPermissionPatterns.tsx` — Common require_auth patterns with security levels
+- `PermissionAuditChecklist.tsx` — Checklist for systematically auditing permission structures
 - `CommonPermissionTemplates.tsx` — Common permission structure templates for quick starts
 - `ThresholdSimulator.tsx` — Standalone threshold calculation
 - `PermissionTreePreview.tsx` — Simple preview version
