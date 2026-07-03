@@ -24,13 +24,84 @@
 
 ## Examples Folder
 
-This repository includes a dedicated `/examples` folder with reusable components focused on Permission Tree Visualization:
+This repository includes a dedicated `/examples` folder with reusable components focused on Permission Tree Visualization and Safety Analysis:
 
-- `PermissionTree.tsx` — **Enhanced interactive tree** with editing, threshold changes, and key management
-- `ThresholdSimulator.tsx` — Standalone threshold calculation component
+- `PermissionTree.tsx` — **Enhanced interactive tree** with full editing support (add/remove keys, change thresholds)
+- `PermissionRiskAnalyzer.tsx` — Clean risk and warning display component
+- `ThresholdSimulator.tsx` — Standalone threshold calculation
 - `PermissionTreePreview.tsx` — Simple preview version
 
-These are designed to be easy to copy and extend.
+These components are designed to be copy-paste friendly and educational.
+
+---
+
+## Smart Contract Permission Patterns & Best Practices
+
+This section provides deep guidance on how smart contracts should interact with the Antelope permission model on WAX.
+
+### Core Concepts for Contract Developers
+
+When writing smart contracts, permissions are enforced through `require_auth()` calls. Understanding the difference between generic and specific permission requirements is critical for security.
+
+#### 1. Generic vs Specific Permission Requirements
+
+```cpp
+// Generic - requires the caller's 'active' permission by default
+void mycontract::transfer(name from, name to, asset quantity, string memo) {
+    require_auth(from);
+}
+
+// Specific - only allows calls authorized with the 'transfer' permission
+void mycontract::transfer(name from, name to, asset quantity, string memo) {
+    require_auth(permission_level{from, "transfer"_n});
+}
+```
+
+**Recommendation**: Use specific linked permissions (`transfer`, `claim`, `publish`, etc.) for any action that moves value or has significant impact.
+
+#### 2. Common Permission Patterns in Contracts
+
+| Pattern                        | When to Use                                      | Security Level | Example Use Case                     |
+|--------------------------------|--------------------------------------------------|----------------|--------------------------------------|
+| Default `active`               | Simple read-only or low-risk actions             | Medium         | Viewing data, simple queries         |
+| Linked `transfer` permission   | Any action that moves tokens or value            | High           | Token transfers, withdrawals         |
+| Linked `claim` / `reward`      | Game reward claiming, airdrops                   | High           | Games and play-to-earn mechanics     |
+| Linked `admin` / `publish`     | Administrative or content publishing actions     | High           | DAO tools, content platforms         |
+| Multi-level thresholds         | High-value or governance actions                 | Very High      | Treasury management, protocol changes|
+
+#### 3. Dangerous Patterns to Avoid in Contracts
+
+| Anti-Pattern                              | Risk                                      | Recommendation                                      |
+|-------------------------------------------|-------------------------------------------|-----------------------------------------------------|
+| Using only generic `require_auth(user)` for high-value actions | Anyone with `active` can abuse the action | Use specific linked permissions instead             |
+| Allowing `active` to control `owner` in permission setup | Complete account takeover possible       | Never give `active` authority over `owner`          |
+| Not validating the actor in multi-action transactions | Cross-contract attacks possible          | Always explicitly check the `from` / actor          |
+| Overly permissive linked permissions      | Smart contracts can be abused by other contracts | Scope linked permissions as narrowly as possible   |
+
+### Best Practices for Smart Contract Permissions
+
+1. **Always prefer specific linked permissions** for value-moving actions.
+2. **Validate the exact permission level** when security matters.
+3. **Document your permission requirements** clearly in the contract and frontend.
+4. **Use the visualizer tool** before deploying contracts that interact with permissions.
+5. **Test with multi-sig accounts** during development.
+6. **Implement clear error messages** when permission checks fail.
+
+### Example: Safe Reward Claiming in a Game
+
+```cpp
+void mygame::claimreward(name player, uint64_t amount) {
+    // Only allows calls authorized with the player's 'claim' permission
+    require_auth(permission_level{player, "claim"_n});
+
+    // Additional business logic checks...
+    check(amount > 0, "Amount must be greater than zero");
+
+    // ... distribute reward
+}
+```
+
+This pattern is much safer than using generic `require_auth(player)`.
 
 ---
 
