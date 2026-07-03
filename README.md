@@ -161,6 +161,30 @@ These components are designed to be copy-paste friendly and educational.
 
 ---
 
+## Using These Components in Your Project
+
+All components in the `/examples` folder are designed to be easy to copy and adapt into your own Next.js, React, or TypeScript projects.
+
+### Quick Integration Steps
+
+1. Copy the desired component file(s) into your project.
+2. Adjust imports and styling to match your design system (most use Tailwind + shadcn/ui patterns).
+3. Pass the required props (e.g. `PermissionTree` needs a `PermissionNode` structure).
+4. Connect to your data source (e.g. fetch account permissions via WAX RPC or WharfKit).
+
+### Recommended Starting Points
+
+- **For visualization**: Start with `PermissionTree.tsx` + `PermissionWeightVisualizer.tsx`
+- **For safety checks**: Use `PermissionRiskAnalyzer.tsx` + `PermissionAuditChecklist.tsx`
+- **For scopes education**: Use `LinkedPermissionExample.tsx` + `ScopeImpactSimulator.tsx`
+- **For smart contract developers**: Use `SmartContractPermissionPatterns.tsx` + `PermissionPolicyChecker.tsx`
+
+### TypeScript Types
+
+Most components use the types defined in `lib/types.ts`. You can copy those types or extend them as needed.
+
+---
+
 ## Common Workflows
 
 This section covers the most important real-world workflows when working with permissions on WAX.
