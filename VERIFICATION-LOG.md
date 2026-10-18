@@ -18,13 +18,14 @@ Never mark something verified without running it and recording evidence.
 ## Claims in this repo
 | Claim | Status | Evidence |
 | --- | --- | --- |
-| Pure client-side threshold engine correctly calculates M-of-N | UNTESTED | `calculateThreshold` in lib/permissionEngine.ts |
-| Safety rules detect owner threshold < 1 | UNTESTED | `validateProposedChange` Rule 1 |
-| Safety rules detect total weight < threshold | UNTESTED | `validateProposedChange` Rule 3 |
+| Pure client-side threshold engine correctly calculates M-of-N | UNTESTED | `calculateThreshold` in lib/permissionEngine.ts + skeleton in lib/permissionEngine.test.ts |
+| Safety rules detect owner threshold < 1 | UNTESTED | `validateProposedChange` Rule 1 + test skeleton |
+| Safety rules detect total weight < threshold | UNTESTED | `validateProposedChange` Rule 3 + test skeleton |
 | Interactive tree renders hierarchical permissions | UNTESTED | components/PermissionTree.tsx |
 | Linked permission scopes reduce attack surface | UNTESTED | Educational content + LinkedPermissionExample.tsx |
 | Demo runs with mock data (zero network) | UNTESTED | app/page.tsx |
 | Trust label present in README | VERIFIED | Header added 2026-10-18 |
+| Unit-test skeleton present | VERIFIED | lib/permissionEngine.test.ts added 2026-10-18 |
 
 ## How to verify
 ```bash
@@ -34,14 +35,14 @@ curl -s https://wax.greymass.com/v1/chain/get_account -d '{"account_name":"ACCOU
 # Typecheck the pure engine
 npm run typecheck
 
-# (Future) Unit test the engine
-# npx vitest run lib/permissionEngine.test.ts
+# Run unit tests (after npm install)
+npm test
 ```
 Record command + output hash (e.g. `sha256sum`) here when verified.
 
 **Trust label:** educational-reference
 
 **Next refinement targets:**
-- Add unit tests for `calculateThreshold` and `validateProposedChange`
+- Run `npm test` and mark engine claims VERIFIED if passing
 - Record one live `get_account` smoke test
 - Expand ARCHITECTURE.md with data-flow diagram
