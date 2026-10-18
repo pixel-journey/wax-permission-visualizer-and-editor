@@ -18,7 +18,7 @@ jobs:
       - name: Install
         run: npm ci || npm install
       - name: Typecheck
-        run: npx tsc --noEmit || echo "Add typecheck script to package.json"
+        run: npm run typecheck
       - name: Lint
         run: npm run lint || echo "Lint skipped"
       - name: Build
