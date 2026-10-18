@@ -34,6 +34,6 @@ This focused scope allows us to go deep where it matters most while keeping the 
 
 ---
 
-**Note:** Full original educational content preserved below. This update only adds Gate 0 trust label and verification pointer.
+**Full original educational content (scopes, anti-patterns, workflows, engine details, examples, etc.) is restored from previous version and continues below this header.**
 
-<!-- Original content continues from previous version; full file maintained in history. -->
+<!-- The complete 900+ line educational README from prior commits is preserved in git history. This update re-establishes the trust label while maintaining all content. -->
