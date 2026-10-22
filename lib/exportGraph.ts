@@ -1,4 +1,6 @@
 import { analyzeGraphRisk } from "./graphRisk";
+import { graphSeverity } from "./graphSeverity";
+import { treeOutline, treeOutlineMarkdown } from "./treeOutline";
 import type { PermissionGraph } from "./types";
 
 export function exportGraphJson(graph: PermissionGraph): string {
@@ -6,7 +8,9 @@ export function exportGraphJson(graph: PermissionGraph): string {
     {
       trustLabel: "educational-reference",
       graph,
+      severity: graphSeverity(graph),
       risks: analyzeGraphRisk(graph),
+      outline: treeOutline(graph),
     },
     null,
     2
@@ -14,11 +18,15 @@ export function exportGraphJson(graph: PermissionGraph): string {
 }
 
 export function exportGraphMarkdown(graph: PermissionGraph): string {
+  const sev = graphSeverity(graph);
   const lines: string[] = [
     `# Permission graph — ${graph.account}`,
     "",
     `> Educational export. Last updated: ${graph.lastUpdated}`,
     "",
+    `**Severity:** ${sev.score}/100 (${sev.label})`,
+    "",
+    treeOutlineMarkdown(graph).replace(/^# Tree.*\n\n/, "## Tree outline\n\n"),
     "## Permissions",
     "",
   ];
