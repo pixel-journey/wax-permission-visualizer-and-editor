@@ -5,6 +5,8 @@ export { graphSeverity } from "./graphSeverity";
 export { exportGraphJson, exportGraphMarkdown } from "./exportGraph";
 export { mockSafeGraph, mockUnsafeGraph } from "./fixtures";
 export { treeOutline, treeOutlineMarkdown } from "./treeOutline";
+export { diffPermissionGraphs } from "./graphDiff";
+export { saveGraphDraft, loadGraphDraft, clearGraphDraft } from "./graphStorage";
 export type {
   PermissionGraph,
   PermissionNode,
