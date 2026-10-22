@@ -6,6 +6,7 @@ import { RelatedBlueprints } from '@/components/RelatedBlueprints';
 import { exportGraphJson, exportGraphMarkdown } from '@/lib/exportGraph';
 import { mockSafeGraph, mockUnsafeGraph } from '@/lib/fixtures';
 import { analyzeGraphRisk } from '@/lib/graphRisk';
+import { graphSeverity } from '@/lib/graphSeverity';
 import { fetchPermissionGraph } from '@/lib/parseAccount';
 import { PermissionGraph } from '@/lib/types';
 import { calculateThreshold } from '@/lib/permissionEngine';
@@ -20,6 +21,7 @@ export default function PermissionVisualizerPage() {
   const [loading, setLoading] = useState(false);
 
   const risks = useMemo(() => analyzeGraphRisk(graph), [graph]);
+  const severity = useMemo(() => graphSeverity(graph), [graph]);
 
   const handleFetchLive = async () => {
     setLoading(true);
@@ -76,7 +78,7 @@ export default function PermissionVisualizerPage() {
               PERMISSION VISUALIZER
             </div>
             <div className="text-xs opacity-60">
-              Pixel Journey · Pass 3 · educational-reference
+              Pixel Journey · Pass 4 complete · educational-reference
             </div>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -128,7 +130,7 @@ export default function PermissionVisualizerPage() {
           </div>
         </div>
 
-        <p className="text-xs opacity-60 mb-4 max-w-3xl leading-relaxed">
+        <p className="text-xs opacity-60 mb-2 max-w-3xl leading-relaxed">
           Prefer <strong className="text-emerald-400/90">WharfKit</strong>. Session keys:{' '}
           <a
             className="underline text-emerald-400"
@@ -139,6 +141,19 @@ export default function PermissionVisualizerPage() {
             wax-wharfkit-session-keys-and-linked-permissions
           </a>
           . No updateauth broadcast.
+        </p>
+
+        <p className="text-sm mb-4">
+          Graph severity:{" "}
+          <span
+            className={
+              severity.label === 'critical' || severity.label === 'high'
+                ? 'text-red-300 font-mono'
+                : 'text-emerald-300 font-mono'
+            }
+          >
+            {severity.score}/100 ({severity.label})
+          </span>
         </p>
 
         <div className="flex gap-3 mb-6">
