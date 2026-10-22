@@ -1,12 +1,12 @@
 # Verification Log
 
 **Trust label:** educational-reference  
-**Updated:** 2026-10-22 (Pass 3)
+**Updated:** 2026-10-23 (Pass 4 complete)
 
 | Claim | Status | Evidence |
 |-------|--------|----------|
-| Engine / parse / graph risk | **verified** (unit) | lib/*.test.ts |
-| Export MD/JSON + unsafe fixture | **verified** (unit) | `lib/exportGraph.test.ts` |
+| Engine / parse / risk / export | **verified** (unit) | lib/*.test.ts |
+| graphSeverity | **verified** (unit) | `lib/graphSeverity.test.ts` |
 | Live get_account | soft-fail optional | CORS/offline |
 | updateauth broadcast | **not claimed** | educational |
 
