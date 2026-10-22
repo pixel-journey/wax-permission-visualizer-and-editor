@@ -3,6 +3,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { PermissionTree } from '@/components/PermissionTree';
 import { RelatedBlueprints } from '@/components/RelatedBlueprints';
+import { buildAuditReportMarkdown } from '@/lib/auditReport';
 import { exportGraphJson, exportGraphMarkdown } from '@/lib/exportGraph';
 import { mockSafeGraph, mockUnsafeGraph } from '@/lib/fixtures';
 import { diffPermissionGraphs } from '@/lib/graphDiff';
@@ -118,7 +119,7 @@ export default function PermissionVisualizerPage() {
               PERMISSION VISUALIZER
             </div>
             <div className="text-xs opacity-60">
-              Pixel Journey · Pass 8 · educational-reference
+              Pixel Journey · Pass 9 · educational-reference
             </div>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -197,6 +198,18 @@ export default function PermissionVisualizerPage() {
             >
               Copy JSON
             </button>
+            <button
+              type="button"
+              onClick={() =>
+                copy(
+                  buildAuditReportMarkdown(graph, baseline),
+                  'Full audit report copied'
+                )
+              }
+              className="px-3 py-2 text-sm bg-emerald-900 rounded-lg"
+            >
+              Copy audit report
+            </button>
             {baseline && (
               <button
                 type="button"
@@ -219,8 +232,8 @@ export default function PermissionVisualizerPage() {
         </div>
 
         <p className="text-xs opacity-60 mb-2 max-w-3xl leading-relaxed">
-          Prefer <strong className="text-emerald-400/90">WharfKit</strong>. Proposal sketches
-          are educational only — never auto-broadcast.
+          Prefer <strong className="text-emerald-400/90">WharfKit</strong>. Audit report is
+          educational — never auto-broadcast.
         </p>
 
         <p className="text-sm mb-4">
