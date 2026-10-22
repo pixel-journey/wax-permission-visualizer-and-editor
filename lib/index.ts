@@ -7,6 +7,10 @@ export { mockSafeGraph, mockUnsafeGraph } from "./fixtures";
 export { treeOutline, treeOutlineMarkdown } from "./treeOutline";
 export { diffPermissionGraphs } from "./graphDiff";
 export { saveGraphDraft, loadGraphDraft, clearGraphDraft } from "./graphStorage";
+export {
+  proposalSketchesFromDiff,
+  proposalSketchesMarkdown,
+} from "./proposalSketches";
 export type {
   PermissionGraph,
   PermissionNode,
