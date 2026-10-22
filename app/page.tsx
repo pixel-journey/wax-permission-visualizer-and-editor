@@ -8,6 +8,7 @@ import { mockSafeGraph, mockUnsafeGraph } from '@/lib/fixtures';
 import { analyzeGraphRisk } from '@/lib/graphRisk';
 import { graphSeverity } from '@/lib/graphSeverity';
 import { fetchPermissionGraph } from '@/lib/parseAccount';
+import { treeOutline } from '@/lib/treeOutline';
 import { PermissionGraph } from '@/lib/types';
 import { calculateThreshold } from '@/lib/permissionEngine';
 
@@ -22,6 +23,7 @@ export default function PermissionVisualizerPage() {
 
   const risks = useMemo(() => analyzeGraphRisk(graph), [graph]);
   const severity = useMemo(() => graphSeverity(graph), [graph]);
+  const outline = useMemo(() => treeOutline(graph), [graph]);
 
   const handleFetchLive = async () => {
     setLoading(true);
@@ -78,7 +80,7 @@ export default function PermissionVisualizerPage() {
               PERMISSION VISUALIZER
             </div>
             <div className="text-xs opacity-60">
-              Pixel Journey · Pass 4 complete · educational-reference
+              Pixel Journey · Pass 5 · educational-reference
             </div>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -199,7 +201,7 @@ export default function PermissionVisualizerPage() {
         )}
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          <div className="lg:col-span-8">
+          <div className="lg:col-span-8 space-y-4">
             <div className="mb-2 flex items-center justify-between text-xs opacity-70">
               <div>INTERACTIVE PERMISSION TREE</div>
               <div className="font-mono">
@@ -213,6 +215,23 @@ export default function PermissionVisualizerPage() {
               selectedNode={selectedNode}
               onSelectNode={setSelectedNode}
             />
+            <div className="border border-white/10 bg-black/30 rounded-xl p-4 text-xs font-mono">
+              <div className="opacity-60 mb-2 tracking-widest text-[10px]">OUTLINE</div>
+              <ul className="space-y-1">
+                {outline.map((l) => (
+                  <li key={l.name}>
+                    <button
+                      type="button"
+                      className="text-left hover:text-emerald-400"
+                      style={{ paddingLeft: l.depth * 12 }}
+                      onClick={() => setSelectedNode(l.name)}
+                    >
+                      {l.name} · thr {l.threshold} · keys {l.keyCount}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
 
           <div className="lg:col-span-4 space-y-6">
