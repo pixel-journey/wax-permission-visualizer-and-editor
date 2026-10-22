@@ -3,50 +3,20 @@
 import React, { useMemo, useState } from 'react';
 import { PermissionTree } from '@/components/PermissionTree';
 import { RelatedBlueprints } from '@/components/RelatedBlueprints';
+import { exportGraphJson, exportGraphMarkdown } from '@/lib/exportGraph';
+import { mockSafeGraph, mockUnsafeGraph } from '@/lib/fixtures';
 import { analyzeGraphRisk } from '@/lib/graphRisk';
 import { fetchPermissionGraph } from '@/lib/parseAccount';
 import { PermissionGraph } from '@/lib/types';
 import { calculateThreshold } from '@/lib/permissionEngine';
 
-const createMockGraph = (account: string): PermissionGraph => ({
-  account,
-  lastUpdated: new Date().toISOString(),
-  permissions: {
-    owner: {
-      name: 'owner',
-      threshold: 1,
-      keys: [{ key: 'EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV', weight: 1 }],
-      accounts: [],
-    },
-    active: {
-      name: 'active',
-      parent: 'owner',
-      threshold: 2,
-      keys: [
-        { key: 'EOS7examplekeyaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', weight: 1 },
-        { key: 'EOS8examplekeybbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', weight: 1 },
-      ],
-      accounts: [
-        { permission: { actor: 'partneraccount', permission: 'active' }, weight: 1 },
-      ],
-    },
-    gameplay: {
-      name: 'gameplay',
-      parent: 'active',
-      threshold: 1,
-      keys: [{ key: 'PUB_K1_GAMEPLAY_SESSION_EXAMPLE', weight: 1 }],
-      accounts: [],
-    },
-  },
-});
-
 export default function PermissionVisualizerPage() {
   const [account, setAccount] = useState('eosio');
-  const [graph, setGraph] = useState<PermissionGraph>(createMockGraph('demo'));
+  const [graph, setGraph] = useState<PermissionGraph>(() => mockSafeGraph('demo'));
   const [mode, setMode] = useState<'viewer' | 'editor'>('viewer');
   const [selectedNode, setSelectedNode] = useState<string | null>('owner');
   const [simulationKeys, setSimulationKeys] = useState<string[]>([]);
-  const [status, setStatus] = useState<string | null>('Mock graph — click Load for soft-fail get_account');
+  const [status, setStatus] = useState<string | null>('Mock safe graph loaded');
   const [loading, setLoading] = useState(false);
 
   const risks = useMemo(() => analyzeGraphRisk(graph), [graph]);
@@ -69,6 +39,15 @@ export default function PermissionVisualizerPage() {
     setStatus(
       `Loaded ${Object.keys(r.graph.permissions).length} permission(s) for ${r.graph.account}`
     );
+  };
+
+  const copy = async (text: string, ok: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setStatus(ok);
+    } catch {
+      setStatus('Clipboard unavailable');
+    }
   };
 
   const handleUpdate = (nodeName: string, action: string) => {
@@ -97,33 +76,60 @@ export default function PermissionVisualizerPage() {
               PERMISSION VISUALIZER
             </div>
             <div className="text-xs opacity-60">
-              Pixel Journey · Pass 2 · educational-reference
+              Pixel Journey · Pass 3 · educational-reference
             </div>
           </div>
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-2">
             <button
               type="button"
               onClick={() => setMode(mode === 'viewer' ? 'editor' : 'viewer')}
-              className="px-4 py-2 text-sm border border-white/20 hover:bg-white/5 rounded-lg"
+              className="px-3 py-2 text-sm border border-white/20 rounded-lg"
             >
-              {mode === 'viewer' ? 'Editor mode' : 'Viewer mode'}
+              {mode === 'viewer' ? 'Editor' : 'Viewer'}
             </button>
             <button
               type="button"
               onClick={() => {
-                setGraph(createMockGraph('demo'));
-                setStatus('Restored mock graph');
+                setGraph(mockSafeGraph('demo'));
+                setSelectedNode('owner');
+                setStatus('Safe mock (includes gameplay)');
               }}
-              className="px-4 py-2 text-sm bg-white/10 rounded-lg"
+              className="px-3 py-2 text-sm bg-white/10 rounded-lg"
             >
-              Mock demo
+              Safe mock
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setGraph(mockUnsafeGraph());
+                setSelectedNode('owner');
+                setStatus('Unsafe fixture — intentional anti-patterns');
+              }}
+              className="px-3 py-2 text-sm bg-red-900/50 rounded-lg"
+            >
+              Unsafe fixture
+            </button>
+            <button
+              type="button"
+              onClick={() =>
+                copy(exportGraphMarkdown(graph), 'Markdown export copied')
+              }
+              className="px-3 py-2 text-sm bg-sky-800 rounded-lg"
+            >
+              Copy MD
+            </button>
+            <button
+              type="button"
+              onClick={() => copy(exportGraphJson(graph), 'JSON export copied')}
+              className="px-3 py-2 text-sm bg-sky-900 rounded-lg"
+            >
+              Copy JSON
             </button>
           </div>
         </div>
 
         <p className="text-xs opacity-60 mb-4 max-w-3xl leading-relaxed">
-          Prefer <strong className="text-emerald-400/90">WharfKit</strong> for proposals.
-          Session keys:{' '}
+          Prefer <strong className="text-emerald-400/90">WharfKit</strong>. Session keys:{' '}
           <a
             className="underline text-emerald-400"
             href="https://github.com/pixel-journey/wax-wharfkit-session-keys-and-linked-permissions"
@@ -132,7 +138,7 @@ export default function PermissionVisualizerPage() {
           >
             wax-wharfkit-session-keys-and-linked-permissions
           </a>
-          . No updateauth broadcast from this page.
+          . No updateauth broadcast.
         </p>
 
         <div className="flex gap-3 mb-6">
