@@ -14,9 +14,12 @@ import {
   saveGraphDraft,
 } from '@/lib/graphStorage';
 import { fetchPermissionGraph } from '@/lib/parseAccount';
+import {
+  calculateThreshold,
+  validateProposedChange,
+} from '@/lib/permissionEngine';
 import { treeOutline } from '@/lib/treeOutline';
 import { PermissionGraph } from '@/lib/types';
-import { calculateThreshold } from '@/lib/permissionEngine';
 
 export default function PermissionVisualizerPage() {
   const [account, setAccount] = useState('eosio');
@@ -41,6 +44,10 @@ export default function PermissionVisualizerPage() {
   const outline = useMemo(() => treeOutline(graph), [graph]);
   const diffLines = useMemo(
     () => (baseline ? diffPermissionGraphs(baseline, graph) : []),
+    [baseline, graph]
+  );
+  const changeWarnings = useMemo(
+    () => (baseline ? validateProposedChange(baseline, graph) : []),
     [baseline, graph]
   );
 
@@ -100,7 +107,7 @@ export default function PermissionVisualizerPage() {
               PERMISSION VISUALIZER
             </div>
             <div className="text-xs opacity-60">
-              Pixel Journey · Pass 6 · educational-reference
+              Pixel Journey · Pass 7 · educational-reference
             </div>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -137,7 +144,7 @@ export default function PermissionVisualizerPage() {
               type="button"
               onClick={() => {
                 setBaseline(graph);
-                setStatus('Baseline snapshot set for diff');
+                setStatus('Baseline snapshot set');
               }}
               className="px-3 py-2 text-sm bg-violet-800 rounded-lg"
             >
@@ -183,8 +190,8 @@ export default function PermissionVisualizerPage() {
         </div>
 
         <p className="text-xs opacity-60 mb-2 max-w-3xl leading-relaxed">
-          Prefer <strong className="text-emerald-400/90">WharfKit</strong>. No updateauth
-          broadcast. Diff is local only.
+          Prefer <strong className="text-emerald-400/90">WharfKit</strong>. Proposed-change
+          checks are local heuristics — not a broadcast.
         </p>
 
         <p className="text-sm mb-4">
@@ -224,7 +231,8 @@ export default function PermissionVisualizerPage() {
         )}
 
         {risks.length > 0 && (
-          <ul className="mb-6 text-xs space-y-1 rounded-xl border border-amber-500/20 bg-amber-500/5 p-4">
+          <ul className="mb-4 text-xs space-y-1 rounded-xl border border-amber-500/20 bg-amber-500/5 p-4">
+            <li className="opacity-60">GRAPH RISK</li>
             {risks.map((w) => (
               <li
                 key={w.message}
@@ -235,6 +243,20 @@ export default function PermissionVisualizerPage() {
                       ? 'text-amber-300'
                       : 'text-white/50'
                 }
+              >
+                [{w.level}] {w.message}
+              </li>
+            ))}
+          </ul>
+        )}
+
+        {changeWarnings.length > 0 && (
+          <ul className="mb-4 text-xs space-y-1 rounded-xl border border-red-500/30 bg-red-500/10 p-4">
+            <li className="opacity-60">PROPOSED CHANGE vs BASELINE</li>
+            {changeWarnings.map((w) => (
+              <li
+                key={w.message}
+                className={w.level === 'danger' ? 'text-red-300' : 'text-amber-300'}
               >
                 [{w.level}] {w.message}
               </li>
