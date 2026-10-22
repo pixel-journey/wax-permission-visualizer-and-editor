@@ -11,6 +11,7 @@ export {
   proposalSketchesFromDiff,
   proposalSketchesMarkdown,
 } from "./proposalSketches";
+export { buildAuditReportMarkdown } from "./auditReport";
 export type {
   PermissionGraph,
   PermissionNode,
