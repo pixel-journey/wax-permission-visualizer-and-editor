@@ -1,7 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { PermissionTree } from '@/components/PermissionTree';
+import { RelatedBlueprints } from '@/components/RelatedBlueprints';
+import { analyzeGraphRisk } from '@/lib/graphRisk';
 import { fetchPermissionGraph } from '@/lib/parseAccount';
 import { PermissionGraph } from '@/lib/types';
 import { calculateThreshold } from '@/lib/permissionEngine';
@@ -46,6 +48,8 @@ export default function PermissionVisualizerPage() {
   const [simulationKeys, setSimulationKeys] = useState<string[]>([]);
   const [status, setStatus] = useState<string | null>('Mock graph — click Load for soft-fail get_account');
   const [loading, setLoading] = useState(false);
+
+  const risks = useMemo(() => analyzeGraphRisk(graph), [graph]);
 
   const handleFetchLive = async () => {
     setLoading(true);
@@ -93,7 +97,7 @@ export default function PermissionVisualizerPage() {
               PERMISSION VISUALIZER
             </div>
             <div className="text-xs opacity-60">
-              Pixel Journey · WAX / Antelope · educational-reference
+              Pixel Journey · Pass 2 · educational-reference
             </div>
           </div>
           <div className="flex flex-wrap gap-3">
@@ -108,7 +112,7 @@ export default function PermissionVisualizerPage() {
               type="button"
               onClick={() => {
                 setGraph(createMockGraph('demo'));
-                setStatus('Restored mock graph (includes gameplay session-key example)');
+                setStatus('Restored mock graph');
               }}
               className="px-4 py-2 text-sm bg-white/10 rounded-lg"
             >
@@ -118,9 +122,8 @@ export default function PermissionVisualizerPage() {
         </div>
 
         <p className="text-xs opacity-60 mb-4 max-w-3xl leading-relaxed">
-          Prefer <strong className="text-emerald-400/90">WharfKit</strong> for any future
-          on-chain proposals — not eosjs or standalone Anchor Link. Limited dApp
-          session keys are covered in{' '}
+          Prefer <strong className="text-emerald-400/90">WharfKit</strong> for proposals.
+          Session keys:{' '}
           <a
             className="underline text-emerald-400"
             href="https://github.com/pixel-journey/wax-wharfkit-session-keys-and-linked-permissions"
@@ -129,7 +132,7 @@ export default function PermissionVisualizerPage() {
           >
             wax-wharfkit-session-keys-and-linked-permissions
           </a>
-          . This page does not broadcast updateauth.
+          . No updateauth broadcast from this page.
         </p>
 
         <div className="flex gap-3 mb-6">
@@ -153,6 +156,25 @@ export default function PermissionVisualizerPage() {
           <p className="text-xs text-emerald-200/80 mb-4" role="status">
             {status}
           </p>
+        )}
+
+        {risks.length > 0 && (
+          <ul className="mb-6 text-xs space-y-1 rounded-xl border border-amber-500/20 bg-amber-500/5 p-4">
+            {risks.map((w) => (
+              <li
+                key={w.message}
+                className={
+                  w.level === 'danger'
+                    ? 'text-red-300'
+                    : w.level === 'warning'
+                      ? 'text-amber-300'
+                      : 'text-white/50'
+                }
+              >
+                [{w.level}] {w.message}
+              </li>
+            ))}
+          </ul>
         )}
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -255,6 +277,8 @@ export default function PermissionVisualizerPage() {
             )}
           </div>
         </div>
+
+        <RelatedBlueprints />
       </div>
     </div>
   );
