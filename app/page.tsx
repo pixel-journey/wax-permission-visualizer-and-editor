@@ -18,6 +18,10 @@ import {
   calculateThreshold,
   validateProposedChange,
 } from '@/lib/permissionEngine';
+import {
+  proposalSketchesFromDiff,
+  proposalSketchesMarkdown,
+} from '@/lib/proposalSketches';
 import { treeOutline } from '@/lib/treeOutline';
 import { PermissionGraph } from '@/lib/types';
 
@@ -49,6 +53,13 @@ export default function PermissionVisualizerPage() {
   const changeWarnings = useMemo(
     () => (baseline ? validateProposedChange(baseline, graph) : []),
     [baseline, graph]
+  );
+  const sketches = useMemo(
+    () =>
+      baseline
+        ? proposalSketchesFromDiff(graph.account || account, baseline, graph)
+        : [],
+    [baseline, graph, account]
   );
 
   const handleFetchLive = async () => {
@@ -107,7 +118,7 @@ export default function PermissionVisualizerPage() {
               PERMISSION VISUALIZER
             </div>
             <div className="text-xs opacity-60">
-              Pixel Journey · Pass 7 · educational-reference
+              Pixel Journey · Pass 8 · educational-reference
             </div>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -186,12 +197,30 @@ export default function PermissionVisualizerPage() {
             >
               Copy JSON
             </button>
+            {baseline && (
+              <button
+                type="button"
+                onClick={() =>
+                  copy(
+                    proposalSketchesMarkdown(
+                      graph.account || account,
+                      baseline,
+                      graph
+                    ),
+                    'Proposal sketches copied (not for broadcast)'
+                  )
+                }
+                className="px-3 py-2 text-sm bg-amber-900/60 rounded-lg"
+              >
+                Copy proposal sketches
+              </button>
+            )}
           </div>
         </div>
 
         <p className="text-xs opacity-60 mb-2 max-w-3xl leading-relaxed">
-          Prefer <strong className="text-emerald-400/90">WharfKit</strong>. Proposed-change
-          checks are local heuristics — not a broadcast.
+          Prefer <strong className="text-emerald-400/90">WharfKit</strong>. Proposal sketches
+          are educational only — never auto-broadcast.
         </p>
 
         <p className="text-sm mb-4">
@@ -265,7 +294,7 @@ export default function PermissionVisualizerPage() {
         )}
 
         {baseline && diffLines.some((l) => l.kind !== 'same') && (
-          <ul className="mb-6 text-xs space-y-1 rounded-xl border border-sky-500/20 bg-sky-500/5 p-4 font-mono">
+          <ul className="mb-4 text-xs space-y-1 rounded-xl border border-sky-500/20 bg-sky-500/5 p-4 font-mono">
             <li className="opacity-60 mb-1">DIFF vs baseline</li>
             {diffLines
               .filter((l) => l.kind !== 'same')
@@ -275,6 +304,19 @@ export default function PermissionVisualizerPage() {
                 </li>
               ))}
           </ul>
+        )}
+
+        {sketches.length > 0 && (
+          <ol className="mb-6 list-decimal pl-5 text-xs space-y-1 rounded-xl border border-violet-500/25 bg-violet-500/10 p-4 font-mono text-violet-100/90">
+            <li className="list-none opacity-60 -ml-5 mb-1">
+              PROPOSAL SKETCHES (not sent)
+            </li>
+            {sketches.map((s) => (
+              <li key={s.summary}>
+                {s.account}::{s.name} — {s.summary}
+              </li>
+            ))}
+          </ol>
         )}
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
