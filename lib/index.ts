@@ -4,6 +4,7 @@ export { analyzeGraphRisk } from "./graphRisk";
 export { graphSeverity } from "./graphSeverity";
 export { exportGraphJson, exportGraphMarkdown } from "./exportGraph";
 export { mockSafeGraph, mockUnsafeGraph } from "./fixtures";
+export { treeOutline, treeOutlineMarkdown } from "./treeOutline";
 export type {
   PermissionGraph,
   PermissionNode,
