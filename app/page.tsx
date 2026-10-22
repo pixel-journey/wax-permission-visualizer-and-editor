@@ -1,12 +1,18 @@
 'use client';
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { PermissionTree } from '@/components/PermissionTree';
 import { RelatedBlueprints } from '@/components/RelatedBlueprints';
 import { exportGraphJson, exportGraphMarkdown } from '@/lib/exportGraph';
 import { mockSafeGraph, mockUnsafeGraph } from '@/lib/fixtures';
+import { diffPermissionGraphs } from '@/lib/graphDiff';
 import { analyzeGraphRisk } from '@/lib/graphRisk';
 import { graphSeverity } from '@/lib/graphSeverity';
+import {
+  clearGraphDraft,
+  loadGraphDraft,
+  saveGraphDraft,
+} from '@/lib/graphStorage';
 import { fetchPermissionGraph } from '@/lib/parseAccount';
 import { treeOutline } from '@/lib/treeOutline';
 import { PermissionGraph } from '@/lib/types';
@@ -15,15 +21,28 @@ import { calculateThreshold } from '@/lib/permissionEngine';
 export default function PermissionVisualizerPage() {
   const [account, setAccount] = useState('eosio');
   const [graph, setGraph] = useState<PermissionGraph>(() => mockSafeGraph('demo'));
+  const [baseline, setBaseline] = useState<PermissionGraph | null>(null);
   const [mode, setMode] = useState<'viewer' | 'editor'>('viewer');
   const [selectedNode, setSelectedNode] = useState<string | null>('owner');
   const [simulationKeys, setSimulationKeys] = useState<string[]>([]);
   const [status, setStatus] = useState<string | null>('Mock safe graph loaded');
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    const d = loadGraphDraft();
+    if (d.ok && d.value) {
+      setGraph(d.value);
+      setStatus('Restored graph draft from localStorage');
+    }
+  }, []);
+
   const risks = useMemo(() => analyzeGraphRisk(graph), [graph]);
   const severity = useMemo(() => graphSeverity(graph), [graph]);
   const outline = useMemo(() => treeOutline(graph), [graph]);
+  const diffLines = useMemo(
+    () => (baseline ? diffPermissionGraphs(baseline, graph) : []),
+    [baseline, graph]
+  );
 
   const handleFetchLive = async () => {
     setLoading(true);
@@ -35,13 +54,14 @@ export default function PermissionVisualizerPage() {
       return;
     }
     setGraph(r.graph);
+    setBaseline(r.graph);
     setSelectedNode(
       r.graph.permissions.owner
         ? 'owner'
         : Object.keys(r.graph.permissions)[0] ?? null
     );
     setStatus(
-      `Loaded ${Object.keys(r.graph.permissions).length} permission(s) for ${r.graph.account}`
+      `Loaded ${Object.keys(r.graph.permissions).length} permission(s) for ${r.graph.account} (baseline set)`
     );
   };
 
@@ -80,7 +100,7 @@ export default function PermissionVisualizerPage() {
               PERMISSION VISUALIZER
             </div>
             <div className="text-xs opacity-60">
-              Pixel Journey · Pass 5 · educational-reference
+              Pixel Journey · Pass 6 · educational-reference
             </div>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -96,7 +116,7 @@ export default function PermissionVisualizerPage() {
               onClick={() => {
                 setGraph(mockSafeGraph('demo'));
                 setSelectedNode('owner');
-                setStatus('Safe mock (includes gameplay)');
+                setStatus('Safe mock');
               }}
               className="px-3 py-2 text-sm bg-white/10 rounded-lg"
             >
@@ -107,11 +127,41 @@ export default function PermissionVisualizerPage() {
               onClick={() => {
                 setGraph(mockUnsafeGraph());
                 setSelectedNode('owner');
-                setStatus('Unsafe fixture — intentional anti-patterns');
+                setStatus('Unsafe fixture');
               }}
               className="px-3 py-2 text-sm bg-red-900/50 rounded-lg"
             >
               Unsafe fixture
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setBaseline(graph);
+                setStatus('Baseline snapshot set for diff');
+              }}
+              className="px-3 py-2 text-sm bg-violet-800 rounded-lg"
+            >
+              Set baseline
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                const r = saveGraphDraft(graph);
+                setStatus(r.ok ? 'Draft saved' : `Save failed: ${r.reason}`);
+              }}
+              className="px-3 py-2 text-sm bg-violet-700 rounded-lg"
+            >
+              Save draft
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                clearGraphDraft();
+                setStatus('Draft cleared');
+              }}
+              className="px-3 py-2 text-sm bg-white/10 rounded-lg"
+            >
+              Clear draft
             </button>
             <button
               type="button"
@@ -133,16 +183,8 @@ export default function PermissionVisualizerPage() {
         </div>
 
         <p className="text-xs opacity-60 mb-2 max-w-3xl leading-relaxed">
-          Prefer <strong className="text-emerald-400/90">WharfKit</strong>. Session keys:{' '}
-          <a
-            className="underline text-emerald-400"
-            href="https://github.com/pixel-journey/wax-wharfkit-session-keys-and-linked-permissions"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            wax-wharfkit-session-keys-and-linked-permissions
-          </a>
-          . No updateauth broadcast.
+          Prefer <strong className="text-emerald-400/90">WharfKit</strong>. No updateauth
+          broadcast. Diff is local only.
         </p>
 
         <p className="text-sm mb-4">
@@ -197,6 +239,19 @@ export default function PermissionVisualizerPage() {
                 [{w.level}] {w.message}
               </li>
             ))}
+          </ul>
+        )}
+
+        {baseline && diffLines.some((l) => l.kind !== 'same') && (
+          <ul className="mb-6 text-xs space-y-1 rounded-xl border border-sky-500/20 bg-sky-500/5 p-4 font-mono">
+            <li className="opacity-60 mb-1">DIFF vs baseline</li>
+            {diffLines
+              .filter((l) => l.kind !== 'same')
+              .map((l) => (
+                <li key={`${l.permission}-${l.kind}`}>
+                  [{l.kind}] {l.permission}: {l.detail}
+                </li>
+              ))}
           </ul>
         )}
 
@@ -262,22 +317,6 @@ export default function PermissionVisualizerPage() {
                       <span className="text-amber-400 shrink-0">{k.weight}</span>
                     </div>
                   ))}
-                  {currentNode.accounts.length > 0 && (
-                    <>
-                      <div className="text-xs opacity-60 mt-4 mb-1">ACCOUNTS</div>
-                      {currentNode.accounts.map((a, i) => (
-                        <div
-                          key={i}
-                          className="text-xs py-1 border-b border-white/10 font-mono flex justify-between"
-                        >
-                          <span>
-                            {a.permission.actor}@{a.permission.permission}
-                          </span>
-                          <span className="text-sky-400">{a.weight}</span>
-                        </div>
-                      ))}
-                    </>
-                  )}
                 </>
               ) : (
                 <div className="text-sm opacity-60">Select a permission</div>
