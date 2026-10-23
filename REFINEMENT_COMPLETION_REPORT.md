@@ -1,26 +1,32 @@
 # Refinement completion — wax-permission-visualizer-and-editor
 
 **Trust label:** `educational-reference`  
-**Passes:** 1–4 (2026-10-22 / 2026-10-23)
+**Passes:** 1–10 (frozen 2026-10-23)
 
-## Delivered
+## Pass map
 
-| Pass | Scope |
-|------|--------|
-| 1 | Soft-fail `get_account` parser + live load |
+| Pass | Delivered |
+|------|-----------|
+| 1 | Soft-fail `get_account` parser + load |
 | 2 | `analyzeGraphRisk` + related blueprints |
 | 3 | MD/JSON export + safe/unsafe fixtures |
-| 4 | Graph severity, `lib/index.ts`, freeze |
+| 4 | Severity score + `lib/index` + freeze |
+| 5 | Tree outline |
+| 6 | Baseline diff + localStorage draft |
+| 7 | Expanded `validateProposedChange` UI |
+| 8 | Educational updateauth/deleteauth sketches |
+| 9 | Combined audit report export |
+| 10 | Final freeze |
 
-## Non-goals
+## Non-goals (explicit)
 
-- No live `updateauth` / `linkauth` broadcast
-- Full multi-sig proposal UX → other blueprints
-- Batch multi-account audit → `wax-account-permission-auditor`
+- No live `updateauth` / `deleteauth` / `linkauth` broadcast
+- Multi-account batch audit → `wax-account-permission-auditor`
+- Multi-sig proposal lifecycle → dedicated multi-sig blueprint
 
-## Stack
+## Stack guidance
 
-Prefer **WharfKit** for any future signing. Avoid eosjs / UAL / Anchor-Link-alone as primary greenfield stack.
+Prefer **WharfKit** for any future real signing. Avoid eosjs / UAL / Anchor-Link-alone as primary greenfield stack.
 
 ## Verify
 
