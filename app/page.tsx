@@ -119,7 +119,7 @@ export default function PermissionVisualizerPage() {
               PERMISSION VISUALIZER
             </div>
             <div className="text-xs opacity-60">
-              Pixel Journey · Pass 9 · educational-reference
+              Pixel Journey · Passes 1–10 frozen · educational-reference
             </div>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -232,8 +232,8 @@ export default function PermissionVisualizerPage() {
         </div>
 
         <p className="text-xs opacity-60 mb-2 max-w-3xl leading-relaxed">
-          Prefer <strong className="text-emerald-400/90">WharfKit</strong>. Audit report is
-          educational — never auto-broadcast.
+          Prefer <strong className="text-emerald-400/90">WharfKit</strong>. Educational
+          tooling only — never auto-broadcast authority changes.
         </p>
 
         <p className="text-sm mb-4">
