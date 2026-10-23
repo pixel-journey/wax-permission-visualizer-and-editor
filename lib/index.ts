@@ -12,6 +12,7 @@ export {
   proposalSketchesMarkdown,
 } from "./proposalSketches";
 export { buildAuditReportMarkdown } from "./auditReport";
+export { nextStepsChecklist } from "./nextSteps";
 export type {
   PermissionGraph,
   PermissionNode,
