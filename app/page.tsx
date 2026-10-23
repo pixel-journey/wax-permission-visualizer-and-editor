@@ -14,6 +14,7 @@ import {
   loadGraphDraft,
   saveGraphDraft,
 } from '@/lib/graphStorage';
+import { nextStepsChecklist } from '@/lib/nextSteps';
 import { fetchPermissionGraph } from '@/lib/parseAccount';
 import {
   calculateThreshold,
@@ -47,6 +48,7 @@ export default function PermissionVisualizerPage() {
   const risks = useMemo(() => analyzeGraphRisk(graph), [graph]);
   const severity = useMemo(() => graphSeverity(graph), [graph]);
   const outline = useMemo(() => treeOutline(graph), [graph]);
+  const steps = useMemo(() => nextStepsChecklist(graph), [graph]);
   const diffLines = useMemo(
     () => (baseline ? diffPermissionGraphs(baseline, graph) : []),
     [baseline, graph]
@@ -119,7 +121,7 @@ export default function PermissionVisualizerPage() {
               PERMISSION VISUALIZER
             </div>
             <div className="text-xs opacity-60">
-              Pixel Journey · Passes 1–10 frozen · educational-reference
+              Pixel Journey · Pass 12 (post-freeze) · educational-reference
             </div>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -232,11 +234,14 @@ export default function PermissionVisualizerPage() {
         </div>
 
         <p className="text-xs opacity-60 mb-2 max-w-3xl leading-relaxed">
-          Prefer <strong className="text-emerald-400/90">WharfKit</strong>. Educational
-          tooling only — never auto-broadcast authority changes.
+          Prefer <strong className="text-emerald-400/90">WharfKit</strong>. See{' '}
+          <a className="underline text-emerald-400" href="https://github.com/pixel-journey/wax-permission-visualizer-and-editor/blob/main/WHARFKIT.md">
+            WHARFKIT.md
+          </a>
+          . Educational only.
         </p>
 
-        <p className="text-sm mb-4">
+        <p className="text-sm mb-2">
           Graph severity:{" "}
           <span
             className={
@@ -248,6 +253,13 @@ export default function PermissionVisualizerPage() {
             {severity.score}/100 ({severity.label})
           </span>
         </p>
+
+        <ol className="mb-6 list-decimal pl-5 text-xs space-y-1 text-white/70 max-w-3xl">
+          <li className="list-none -ml-5 opacity-50 mb-1">NEXT STEPS</li>
+          {steps.map((s) => (
+            <li key={s}>{s}</li>
+          ))}
+        </ol>
 
         <div className="flex gap-3 mb-6">
           <input
