@@ -1,10 +1,9 @@
 # Verification Log
 
-**Updated:** 2026-10-26 (Pass 11)
+**Updated:** 2026-10-26 (Pass 12)
 
 | Claim | Status |
 | --- | --- |
-| Pure engines / fixtures | unit |
-| Live get_account | soft-fail |
-| Live updateauth | out of scope |
+| Social owner not false-positive | graphRisk.test.ts |
+| Same-account active on owner | danger |
 | CI | test + typecheck + build |

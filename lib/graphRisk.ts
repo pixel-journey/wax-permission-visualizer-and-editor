@@ -3,6 +3,7 @@ import type { ChangeWarning, PermissionGraph } from "./types";
 export function analyzeGraphRisk(graph: PermissionGraph): ChangeWarning[] {
   const warnings: ChangeWarning[] = [];
   const perms = graph.permissions;
+  const account = graph.account;
 
   for (const [name, node] of Object.entries(perms)) {
     const keyWeight = node.keys.reduce((s, k) => s + k.weight, 0);
@@ -20,20 +21,25 @@ export function analyzeGraphRisk(graph: PermissionGraph): ChangeWarning[] {
     if (name === "owner" && total === 0) {
       warnings.push({
         level: "danger",
-        message: "owner has no keys or account authorities — recovery may be impossible",
+        message:
+          "owner has no keys or account authorities — recovery may be impossible",
         affectedPermission: "owner",
       });
     }
 
-    if (name === "owner" && node.keys.length === 1 && node.accounts.length === 0) {
+    if (
+      name === "owner" &&
+      node.keys.length === 1 &&
+      node.accounts.length === 0 &&
+      total >= node.threshold
+    ) {
       warnings.push({
         level: "warning",
-        message: "owner is single-key — no multi-sig recovery",
+        message: "owner is single-key — no multi-party recovery path",
         affectedPermission: "owner",
       });
     }
 
-    // active listed as parent of owner would be inverted (should never happen on-chain)
     if (name === "owner" && node.parent === "active") {
       warnings.push({
         level: "danger",
@@ -43,13 +49,27 @@ export function analyzeGraphRisk(graph: PermissionGraph): ChangeWarning[] {
     }
 
     for (const a of node.accounts) {
-      if (name === "owner" && a.permission.permission === "active") {
+      // Only the *same* account's active on owner is the classic anti-pattern.
+      // Other accounts' @active weights are normal social-recovery / multi-sig.
+      if (
+        name === "owner" &&
+        a.permission.actor === account &&
+        a.permission.permission === "active"
+      ) {
         warnings.push({
           level: "danger",
-          message: `owner includes ${a.permission.actor}@active — active must not control owner`,
+          message: `owner includes ${account}@active — this account's active must not control its own owner`,
           affectedPermission: "owner",
         });
       }
+    }
+
+    if (name === "active" && node.parent && node.parent !== "owner") {
+      warnings.push({
+        level: "warning",
+        message: `active parent is "${node.parent}" (expected owner)`,
+        affectedPermission: "active",
+      });
     }
   }
 
@@ -64,6 +84,26 @@ export function analyzeGraphRisk(graph: PermissionGraph): ChangeWarning[] {
     warnings.push({
       level: "info",
       message: "No active permission listed",
+    });
+  }
+
+  const owner = perms.owner;
+  if (owner && owner.accounts.length >= 2 && owner.threshold >= 2) {
+    warnings.push({
+      level: "info",
+      message:
+        "owner uses multi-party account authorities — see social-recovery blueprint for posture/runbooks",
+      affectedPermission: "owner",
+    });
+  }
+
+  const custom = Object.keys(perms).filter(
+    (n) => n !== "owner" && n !== "active"
+  );
+  if (custom.length > 0) {
+    warnings.push({
+      level: "info",
+      message: `Custom permission(s): ${custom.join(", ")} — prefer linkauth scope (session-keys blueprint)`,
     });
   }
 

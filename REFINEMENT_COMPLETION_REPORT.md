@@ -1,11 +1,9 @@
-# Permission visualizer — through Pass 11
+# Through Pass 12
 
 | Pass | Scope |
 |------|--------|
-| 1–10 | Core tree, risk, export, drafts, freeze |
-| **11** | EDUCATION/POLICY, social+game fixtures, CI test+build |
-
-Still **no** live authority broadcast (by design).
+| 11 | EDUCATION, fixtures, CI |
+| **12** | Risk false-positive fix, fixture switcher UI, account-auth in panel, audit download |
 
 ```bash
 npm install && npm test && npm run build

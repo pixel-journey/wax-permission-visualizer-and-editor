@@ -1,43 +1,36 @@
 # Permission trees on WAX / Antelope
 
-## What this tool is for
-
-**Visualize** and **reason about** account permissions (`owner`, `active`, custom) — thresholds, keys, account-auth, and how they relate to **`linkauth`** (scoped actions).
-
-It is **not** a full multi-sig executor and **not** a live `updateauth` broadcaster (by design). Use multi-sig / session-keys blueprints for those flows with **WharfKit**.
-
-## Hierarchy (always)
+## Hierarchy
 
 ```
 owner
   └── active
-        └── custom (gameplay, claim, transfer, …)
+        └── custom (gameplay, claim, …)
 ```
 
-- **owner** can change anything, including itself  
-- **active** cannot replace owner  
-- **Custom** permissions usually parent to `active` and should be **linked** to narrow actions  
+## Critical vs intentional
 
-## Myths
+| Pattern | Verdict |
+|---------|---------|
+| `alice@owner` includes `alice@active` | **Critical** — active must not control own owner |
+| `alice@owner` includes `bob@active` (weight) | **Normal** social / multi-party recovery |
+| Custom `claim` under active | Prefer **linkauth** (session-keys blueprint) |
+| Threshold > total weight | **Impossible** — fix before relying on it |
 
-| Myth | Reality |
-|------|---------|
-| “active can fix a lost owner” | False — only owner (or multi-party owner) can |
-| “One active key is fine for everything” | Large attack surface; use limited + linkauth for games |
-| “Threshold 3 with total weight 2 is conservative” | Impossible — proposals never exec |
-| “linkauth is optional polish” | Best way to shrink what a leaked session key can do |
+## Fixtures in the app
 
-## Cluster map
+- **Safe** — multi-weight active + gameplay  
+- **Unsafe** — impossible thresholds  
+- **Social owner** — 2-of-3 style weights  
+- **Game claim** — limited session permission  
+
+## Cluster
 
 | Need | Repo |
 |------|------|
-| See / export / risk-score a tree | **This repo** |
-| Install limited keys + linkauth | `wax-wharfkit-session-keys-and-linked-permissions` |
-| Social recovery / backup posture | `wax-social-recovery-and-key-backup-tools` |
-| Propose msig | `wax-multi-sig-proposal-builder-and-simulator` |
-| Hardware owner | `wax-hardware-wallet-integration-patterns` |
-| Batch audit many accounts | `wax-account-permission-auditor` |
+| Visualize / risk | **This** |
+| Install limited + linkauth | session-keys |
+| Backup / social recovery design | social-recovery |
+| msig propose | multi-sig builder |
 
-## Stack
-
-Prefer **WharfKit** for any future signing. Avoid eosjs / UAL greenfield.
+Prefer **WharfKit** for any live authority change.

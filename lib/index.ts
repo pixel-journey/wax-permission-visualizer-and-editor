@@ -3,7 +3,12 @@ export { parsePermissionRows, fetchPermissionGraph } from "./parseAccount";
 export { analyzeGraphRisk } from "./graphRisk";
 export { graphSeverity } from "./graphSeverity";
 export { exportGraphJson, exportGraphMarkdown } from "./exportGraph";
-export { mockSafeGraph, mockUnsafeGraph } from "./fixtures";
+export {
+  mockSafeGraph,
+  mockUnsafeGraph,
+  mockSocialOwnerGraph,
+  mockGameLinkedGraph,
+} from "./fixtures";
 export { treeOutline, treeOutlineMarkdown } from "./treeOutline";
 export { diffPermissionGraphs } from "./graphDiff";
 export { saveGraphDraft, loadGraphDraft, clearGraphDraft } from "./graphStorage";
@@ -13,6 +18,7 @@ export {
 } from "./proposalSketches";
 export { buildAuditReportMarkdown } from "./auditReport";
 export { nextStepsChecklist } from "./nextSteps";
+export { downloadTextFile } from "./download";
 export type {
   PermissionGraph,
   PermissionNode,

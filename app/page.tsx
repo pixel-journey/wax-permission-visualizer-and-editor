@@ -4,8 +4,14 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { PermissionTree } from '@/components/PermissionTree';
 import { RelatedBlueprints } from '@/components/RelatedBlueprints';
 import { buildAuditReportMarkdown } from '@/lib/auditReport';
+import { downloadTextFile } from '@/lib/download';
 import { exportGraphJson, exportGraphMarkdown } from '@/lib/exportGraph';
-import { mockSafeGraph, mockUnsafeGraph } from '@/lib/fixtures';
+import {
+  mockGameLinkedGraph,
+  mockSafeGraph,
+  mockSocialOwnerGraph,
+  mockUnsafeGraph,
+} from '@/lib/fixtures';
 import { diffPermissionGraphs } from '@/lib/graphDiff';
 import { analyzeGraphRisk } from '@/lib/graphRisk';
 import { graphSeverity } from '@/lib/graphSeverity';
@@ -65,6 +71,12 @@ export default function PermissionVisualizerPage() {
     [baseline, graph, account]
   );
 
+  const loadFixture = (g: PermissionGraph, label: string) => {
+    setGraph(g);
+    setSelectedNode(g.permissions.owner ? 'owner' : Object.keys(g.permissions)[0] ?? null);
+    setStatus(label);
+  };
+
   const handleFetchLive = async () => {
     setLoading(true);
     setStatus(null);
@@ -112,16 +124,18 @@ export default function PermissionVisualizerPage() {
     ? calculateThreshold(currentNode, simulationKeys)
     : null;
 
+  const acct = graph.account || account || 'account';
+
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white p-6">
       <div className="max-w-7xl mx-auto">
-        <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
+        <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
           <div>
             <div className="text-2xl tracking-widest text-emerald-400 font-bold">
               PERMISSION VISUALIZER
             </div>
             <div className="text-xs opacity-60">
-              Pixel Journey · Pass 12 (post-freeze) · educational-reference
+              Pixel Journey · Pass 12 · educational-reference
             </div>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -134,25 +148,38 @@ export default function PermissionVisualizerPage() {
             </button>
             <button
               type="button"
-              onClick={() => {
-                setGraph(mockSafeGraph('demo'));
-                setSelectedNode('owner');
-                setStatus('Safe mock');
-              }}
+              onClick={() => loadFixture(mockSafeGraph('demo'), 'Safe mock')}
               className="px-3 py-2 text-sm bg-white/10 rounded-lg"
             >
-              Safe mock
+              Safe
             </button>
             <button
               type="button"
-              onClick={() => {
-                setGraph(mockUnsafeGraph());
-                setSelectedNode('owner');
-                setStatus('Unsafe fixture');
-              }}
+              onClick={() => loadFixture(mockUnsafeGraph(), 'Unsafe fixture')}
               className="px-3 py-2 text-sm bg-red-900/50 rounded-lg"
             >
-              Unsafe fixture
+              Unsafe
+            </button>
+            <button
+              type="button"
+              onClick={() =>
+                loadFixture(
+                  mockSocialOwnerGraph('alice.wam'),
+                  'Social 2-of-3 owner fixture'
+                )
+              }
+              className="px-3 py-2 text-sm bg-cyan-900/50 rounded-lg"
+            >
+              Social owner
+            </button>
+            <button
+              type="button"
+              onClick={() =>
+                loadFixture(mockGameLinkedGraph(), 'Game claim-session fixture')
+              }
+              className="px-3 py-2 text-sm bg-lime-900/40 rounded-lg"
+            >
+              Game claim
             </button>
             <button
               type="button"
@@ -202,15 +229,17 @@ export default function PermissionVisualizerPage() {
             </button>
             <button
               type="button"
-              onClick={() =>
-                copy(
+              onClick={() => {
+                downloadTextFile(
+                  `${acct}-audit.md`,
                   buildAuditReportMarkdown(graph, baseline),
-                  'Full audit report copied'
-                )
-              }
+                  'text/markdown;charset=utf-8'
+                );
+                setStatus('Audit report downloaded');
+              }}
               className="px-3 py-2 text-sm bg-emerald-900 rounded-lg"
             >
-              Copy audit report
+              Download audit.md
             </button>
             {baseline && (
               <button
@@ -233,16 +262,32 @@ export default function PermissionVisualizerPage() {
           </div>
         </div>
 
+        <section
+          className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4 text-xs text-amber-100/90 space-y-2 mb-6 max-w-3xl"
+          role="note"
+        >
+          <p className="font-medium text-sm">Read / plan only</p>
+          <p>
+            Soft-fail live <code>get_account</code>. No auto <code>updateauth</code>.{' '}
+            <strong>Foreign</strong> accounts on owner (e.g. bob@active) are normal
+            social recovery — only <em>this</em> account@active on owner is critical.
+            Limited custom perms belong with linkauth (session-keys blueprint).
+          </p>
+        </section>
+
         <p className="text-xs opacity-60 mb-2 max-w-3xl leading-relaxed">
           Prefer <strong className="text-emerald-400/90">WharfKit</strong>. See{' '}
-          <a className="underline text-emerald-400" href="https://github.com/pixel-journey/wax-permission-visualizer-and-editor/blob/main/WHARFKIT.md">
-            WHARFKIT.md
+          <a
+            className="underline text-emerald-400"
+            href="https://github.com/pixel-journey/wax-permission-visualizer-and-editor/blob/main/EDUCATION.md"
+          >
+            EDUCATION.md
           </a>
-          . Educational only.
+          .
         </p>
 
         <p className="text-sm mb-2">
-          Graph severity:{" "}
+          Graph severity:{' '}
           <span
             className={
               severity.label === 'critical' || severity.label === 'high'
@@ -406,6 +451,24 @@ export default function PermissionVisualizerPage() {
                       <span className="text-amber-400 shrink-0">{k.weight}</span>
                     </div>
                   ))}
+                  {currentNode.accounts.length > 0 && (
+                    <>
+                      <div className="text-xs opacity-60 mb-1 mt-3">
+                        ACCOUNT AUTH ({currentNode.accounts.length})
+                      </div>
+                      {currentNode.accounts.map((a, i) => (
+                        <div
+                          key={i}
+                          className="flex justify-between text-xs py-1 border-b border-white/10 font-mono gap-2"
+                        >
+                          <span className="truncate">
+                            {a.permission.actor}@{a.permission.permission}
+                          </span>
+                          <span className="text-amber-400 shrink-0">{a.weight}</span>
+                        </div>
+                      ))}
+                    </>
+                  )}
                 </>
               ) : (
                 <div className="text-sm opacity-60">Select a permission</div>
