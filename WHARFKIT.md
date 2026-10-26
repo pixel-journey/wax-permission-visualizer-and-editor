@@ -1,17 +1,14 @@
-# WharfKit guidance (this repo)
+# WharfKit guidance
 
-**Trust label:** educational-reference
+This repo is **read / plan / educate**. For real permission changes:
 
-This visualizer does **not** broadcast `updateauth` / `deleteauth` / `linkauth`. If you later wire real proposals:
+1. Preview structure here  
+2. Sign with **WharfKit Session Kit** + **Anchor** or **Cloud Wallet**  
+3. Prefer throwaway accounts first  
 
-1. Prefer **[@wharfkit/session](https://docs.wharfkit.com/)** for login, restore, and `session.transact`.
-2. Do **not** start greenfield work on eosjs, UAL, or standalone Anchor Link as the primary stack (deprecated / superseded patterns).
-3. Limited dApp permissions (`updateauth` + `linkauth`) are documented in
-   [wax-wharfkit-session-keys-and-linked-permissions](https://github.com/pixel-journey/wax-wharfkit-session-keys-and-linked-permissions).
-4. Always validate locally first (`validateProposedChange`, `analyzeGraphRisk`) and keep an `owner` recovery path.
-5. Proposal sketches from this repo are **summaries only** — map full `required_auth` yourself before signing.
+Do **not** start greenfield with eosjs, UAL, or standalone Anchor Link.
 
-## Related
+See also:
 
-- Session keys / linked actions: session-keys blueprint
-- Multi-account audit: `wax-account-permission-auditor`
+- `wax-wharfkit-session-keys-and-linked-permissions` — limited keys + linkauth  
+- `wax-multi-sig-proposal-builder-and-simulator` — msig propose/approve/exec  

@@ -1,14 +1,10 @@
 # Verification Log
 
-**Trust label:** educational-reference  
-**Updated:** 2026-10-23 (Pass 12 optional)
+**Updated:** 2026-10-26 (Pass 11)
 
 | Claim | Status |
-|-------|--------|
-| Passes 1–10 formal freeze | complete |
-| Pass 11–12 post-freeze | WHARFKIT.md, nextSteps UI |
-| On-chain writes | **not claimed** |
-
-```bash
-npm test && npm run typecheck
-```
+| --- | --- |
+| Pure engines / fixtures | unit |
+| Live get_account | soft-fail |
+| Live updateauth | out of scope |
+| CI | test + typecheck + build |

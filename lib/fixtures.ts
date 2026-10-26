@@ -66,3 +66,65 @@ export function mockUnsafeGraph(account = "unsafe.demo"): PermissionGraph {
     },
   };
 }
+
+/** 2-of-3 account-auth owner — social recovery style (educational). */
+export function mockSocialOwnerGraph(account = "social.demo"): PermissionGraph {
+  return {
+    account,
+    lastUpdated: new Date().toISOString(),
+    permissions: {
+      owner: {
+        name: "owner",
+        threshold: 2,
+        keys: [{ key: "PUB_K1_SELF", weight: 1 }],
+        accounts: [
+          {
+            permission: { actor: "bob.wam", permission: "active" },
+            weight: 1,
+          },
+          {
+            permission: { actor: "carol.wam", permission: "active" },
+            weight: 1,
+          },
+        ],
+      },
+      active: {
+        name: "active",
+        parent: "owner",
+        threshold: 1,
+        keys: [{ key: "PUB_K1_HOT", weight: 1 }],
+        accounts: [],
+      },
+    },
+  };
+}
+
+/** Game account: limited claim under active. */
+export function mockGameLinkedGraph(account = "gamer.wam"): PermissionGraph {
+  return {
+    account,
+    lastUpdated: new Date().toISOString(),
+    permissions: {
+      owner: {
+        name: "owner",
+        threshold: 1,
+        keys: [{ key: "PUB_K1_COLD", weight: 1 }],
+        accounts: [],
+      },
+      active: {
+        name: "active",
+        parent: "owner",
+        threshold: 1,
+        keys: [{ key: "PUB_K1_HOT", weight: 1 }],
+        accounts: [],
+      },
+      claim: {
+        name: "claim",
+        parent: "active",
+        threshold: 1,
+        keys: [{ key: "PUB_K1_SESSION", weight: 1 }],
+        accounts: [],
+      },
+    },
+  };
+}
