@@ -14,9 +14,16 @@ export interface RawPermissionRow {
   };
 }
 
+export type LinkedActionRow = {
+  account: string;
+  action: string;
+  permission: string;
+};
+
 export function parsePermissionRows(
   account: string,
-  rows: RawPermissionRow[]
+  rows: RawPermissionRow[],
+  linkedActions?: LinkedActionRow[]
 ): PermissionGraph {
   const permissions: Record<string, PermissionNode> = {};
 
@@ -40,7 +47,6 @@ export function parsePermissionRows(
     };
   }
 
-  // Attach children by parent name for tree UIs
   for (const node of Object.values(permissions)) {
     if (!node.parent) continue;
     const parent = permissions[node.parent];
@@ -53,6 +59,7 @@ export function parsePermissionRows(
     account,
     permissions,
     lastUpdated: new Date().toISOString(),
+    linkedActions: linkedActions?.length ? linkedActions : undefined,
   };
 }
 
@@ -82,11 +89,29 @@ export async function fetchPermissionGraph(
     const data = (await res.json()) as {
       account_name?: string;
       permissions?: RawPermissionRow[];
+      /** Present on some node versions / proxies */
+      linked_actions?: Array<{
+        account?: string;
+        action?: string;
+        permission?: string;
+      }>;
     };
     const rows = data.permissions ?? [];
+    const linked: LinkedActionRow[] = (data.linked_actions ?? [])
+      .map((l) => ({
+        account: String(l.account ?? ""),
+        action: String(l.action ?? ""),
+        permission: String(l.permission ?? ""),
+      }))
+      .filter((l) => l.account || l.action || l.permission);
+
     return {
       ok: true,
-      graph: parsePermissionRows(data.account_name ?? name, rows),
+      graph: parsePermissionRows(
+        data.account_name ?? name,
+        rows,
+        linked.length ? linked : undefined
+      ),
     };
   } catch (e) {
     return {

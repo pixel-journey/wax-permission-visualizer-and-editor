@@ -1,9 +1,9 @@
-# Through Pass 12
+# Through Pass 13
 
 | Pass | Scope |
 |------|--------|
-| 11 | EDUCATION, fixtures, CI |
-| **12** | Risk false-positive fix, fixture switcher UI, account-auth in panel, audit download |
+| 12 | Risk fix, fixtures UI |
+| **13** | Share URL, linked_actions soft parse, nextSteps align, related cluster links |
 
 ```bash
 npm install && npm test && npm run build

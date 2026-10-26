@@ -1,9 +1,10 @@
 # Verification Log
 
-**Updated:** 2026-10-26 (Pass 12)
+**Updated:** 2026-10-26 (Pass 13)
 
 | Claim | Status |
 | --- | --- |
-| Social owner not false-positive | graphRisk.test.ts |
-| Same-account active on owner | danger |
+| Share URL | unit |
+| nextSteps strings | unit |
+| linked_actions | soft when RPC provides |
 | CI | test + typecheck + build |

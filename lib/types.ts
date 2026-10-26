@@ -12,7 +12,7 @@ export interface PermissionAccount {
 }
 
 export interface PermissionNode {
-  name: string;                    // 'owner' | 'active' | custom
+  name: string;
   threshold: number;
   keys: PermissionKey[];
   accounts: PermissionAccount[];
@@ -20,11 +20,19 @@ export interface PermissionNode {
   parent?: string;
 }
 
+export interface LinkedAction {
+  account: string;
+  action: string;
+  permission: string;
+}
+
 export interface PermissionGraph {
   account: string;
   permissions: Record<string, PermissionNode>;
   lastUpdated: string;
-  onChainHash?: string;            // For entropy / verification
+  onChainHash?: string;
+  /** Soft-parsed when RPC returns linked_actions */
+  linkedActions?: LinkedAction[];
 }
 
 export interface SimulationResult {
@@ -33,11 +41,11 @@ export interface SimulationResult {
   missingWeight: number;
   satisfiedKeys: string[];
   warnings: string[];
-  riskLevel: 'safe' | 'warning' | 'danger';
+  riskLevel: "safe" | "warning" | "danger";
 }
 
 export interface ChangeWarning {
-  level: 'info' | 'warning' | 'danger';
+  level: "info" | "warning" | "danger";
   message: string;
   affectedPermission?: string;
 }

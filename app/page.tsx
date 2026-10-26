@@ -30,6 +30,7 @@ import {
   proposalSketchesFromDiff,
   proposalSketchesMarkdown,
 } from '@/lib/proposalSketches';
+import { buildAccountShareParam, readAccountFromSearch } from '@/lib/shareUrl';
 import { treeOutline } from '@/lib/treeOutline';
 import { PermissionGraph } from '@/lib/types';
 
@@ -44,6 +45,15 @@ export default function PermissionVisualizerPage() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const shared = readAccountFromSearch(window.location.search);
+      if (shared) {
+        setAccount(shared);
+        setStatus(`Account from share URL: ${shared} — click Load get_account`);
+        window.history.replaceState({}, '', window.location.pathname);
+        return;
+      }
+    }
     const d = loadGraphDraft();
     if (d.ok && d.value) {
       setGraph(d.value);
@@ -73,7 +83,9 @@ export default function PermissionVisualizerPage() {
 
   const loadFixture = (g: PermissionGraph, label: string) => {
     setGraph(g);
-    setSelectedNode(g.permissions.owner ? 'owner' : Object.keys(g.permissions)[0] ?? null);
+    setSelectedNode(
+      g.permissions.owner ? 'owner' : Object.keys(g.permissions)[0] ?? null
+    );
     setStatus(label);
   };
 
@@ -93,8 +105,11 @@ export default function PermissionVisualizerPage() {
         ? 'owner'
         : Object.keys(r.graph.permissions)[0] ?? null
     );
+    const linkN = r.graph.linkedActions?.length ?? 0;
     setStatus(
-      `Loaded ${Object.keys(r.graph.permissions).length} permission(s) for ${r.graph.account} (baseline set)`
+      `Loaded ${Object.keys(r.graph.permissions).length} permission(s) for ${r.graph.account}` +
+        (linkN ? ` · ${linkN} linked_action(s)` : '') +
+        ' (baseline set)'
     );
   };
 
@@ -105,6 +120,15 @@ export default function PermissionVisualizerPage() {
     } catch {
       setStatus('Clipboard unavailable');
     }
+  };
+
+  const copyShare = async () => {
+    const param = buildAccountShareParam(account);
+    const url =
+      typeof window !== 'undefined'
+        ? `${window.location.origin}${window.location.pathname}?${param}`
+        : `?${param}`;
+    await copy(url, 'Share URL copied');
   };
 
   const handleUpdate = (nodeName: string, action: string) => {
@@ -135,7 +159,7 @@ export default function PermissionVisualizerPage() {
               PERMISSION VISUALIZER
             </div>
             <div className="text-xs opacity-60">
-              Pixel Journey · Pass 12 · educational-reference
+              Pixel Journey · Pass 13 · educational-reference
             </div>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -180,6 +204,13 @@ export default function PermissionVisualizerPage() {
               className="px-3 py-2 text-sm bg-lime-900/40 rounded-lg"
             >
               Game claim
+            </button>
+            <button
+              type="button"
+              onClick={() => void copyShare()}
+              className="px-3 py-2 text-sm bg-teal-800 rounded-lg"
+            >
+              Copy share URL
             </button>
             <button
               type="button"
@@ -269,22 +300,10 @@ export default function PermissionVisualizerPage() {
           <p className="font-medium text-sm">Read / plan only</p>
           <p>
             Soft-fail live <code>get_account</code>. No auto <code>updateauth</code>.{' '}
-            <strong>Foreign</strong> accounts on owner (e.g. bob@active) are normal
-            social recovery — only <em>this</em> account@active on owner is critical.
-            Limited custom perms belong with linkauth (session-keys blueprint).
+            Foreign helpers on owner are social recovery; only this account@active on
+            owner is critical. Share with <code>?a=account</code>.
           </p>
         </section>
-
-        <p className="text-xs opacity-60 mb-2 max-w-3xl leading-relaxed">
-          Prefer <strong className="text-emerald-400/90">WharfKit</strong>. See{' '}
-          <a
-            className="underline text-emerald-400"
-            href="https://github.com/pixel-journey/wax-permission-visualizer-and-editor/blob/main/EDUCATION.md"
-          >
-            EDUCATION.md
-          </a>
-          .
-        </p>
 
         <p className="text-sm mb-2">
           Graph severity:{' '}
@@ -327,6 +346,17 @@ export default function PermissionVisualizerPage() {
           <p className="text-xs text-emerald-200/80 mb-4" role="status">
             {status}
           </p>
+        )}
+
+        {graph.linkedActions && graph.linkedActions.length > 0 && (
+          <ul className="mb-4 text-xs space-y-1 rounded-xl border border-lime-500/25 bg-lime-500/10 p-4 font-mono">
+            <li className="opacity-60 list-none">LINKED ACTIONS (from RPC if present)</li>
+            {graph.linkedActions.map((l, i) => (
+              <li key={`${l.account}-${l.action}-${i}`}>
+                {l.permission} → {l.account}::{l.action}
+              </li>
+            ))}
+          </ul>
         )}
 
         {risks.length > 0 && (
