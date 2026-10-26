@@ -12,25 +12,23 @@ owner
 
 | Pattern | Verdict |
 |---------|---------|
-| `alice@owner` includes `alice@active` | **Critical** — active must not control own owner |
-| `alice@owner` includes `bob@active` (weight) | **Normal** social / multi-party recovery |
-| Custom `claim` under active | Prefer **linkauth** (session-keys blueprint) |
-| Threshold > total weight | **Impossible** — fix before relying on it |
+| `alice@owner` includes `alice@active` | **Critical** |
+| `alice@owner` includes `bob@active` | **Normal** social / multi-party |
+| Custom `claim` under active | Prefer **linkauth** |
+| Threshold > total weight | **Impossible** |
 
-## Fixtures in the app
+## App modules (Passes 1–14)
 
-- **Safe** — multi-weight active + gameplay  
-- **Unsafe** — impossible thresholds  
-- **Social owner** — 2-of-3 style weights  
-- **Game claim** — limited session permission  
+Tree · risk · severity · fixtures · live load · baseline/diff · sketches · exports · share · drafts · next steps · related blueprints
 
 ## Cluster
 
 | Need | Repo |
 |------|------|
 | Visualize / risk | **This** |
-| Install limited + linkauth | session-keys |
-| Backup / social recovery design | social-recovery |
-| msig propose | multi-sig builder |
+| Limited keys + linkauth | session-keys |
+| Social recovery design | social-recovery |
+| msig | multi-sig builder |
+| Hardware owner | hardware patterns |
 
-Prefer **WharfKit** for any live authority change.
+Prefer **WharfKit** for live authority changes.
