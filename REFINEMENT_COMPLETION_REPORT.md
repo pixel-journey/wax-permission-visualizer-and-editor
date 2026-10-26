@@ -1,15 +1,12 @@
-# Scope frozen — Pass 14
+# Through Pass 15
 
 | Pass | Scope |
 |------|--------|
-| 12 | Risk false-positive fix |
-| 13 | Share URL, linked_actions, related links |
-| **14** | Print CSS, POLICY lock, freeze banner |
+| 14 | Scope freeze |
+| **15** | RPC endpoint chooser (additive) |
 
-**Non-goals remain:** live authority broadcast.
+Core non-goals unchanged (no live authority broadcast).
 
 ```bash
 npm install && npm test && npm run build
 ```
-
-Next org work: another blueprint unless a new visualizer feature is requested.

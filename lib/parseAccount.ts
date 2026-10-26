@@ -1,4 +1,5 @@
 import type { PermissionGraph, PermissionNode } from "./types";
+import { DEFAULT_RPC_URL } from "./rpcEndpoints";
 
 /** Minimal shape from chain get_account.permissions */
 export interface RawPermissionRow {
@@ -69,12 +70,10 @@ export interface FetchGraphResult {
   reason?: string;
 }
 
-const DEFAULT_RPC = "https://wax.greymass.com";
-
 /** Soft-fail live fetch — never throws. */
 export async function fetchPermissionGraph(
   account: string,
-  rpcUrl: string = DEFAULT_RPC
+  rpcUrl: string = DEFAULT_RPC_URL
 ): Promise<FetchGraphResult> {
   const name = account.trim();
   if (!name) return { ok: false, reason: "empty account" };
@@ -89,7 +88,6 @@ export async function fetchPermissionGraph(
     const data = (await res.json()) as {
       account_name?: string;
       permissions?: RawPermissionRow[];
-      /** Present on some node versions / proxies */
       linked_actions?: Array<{
         account?: string;
         action?: string;

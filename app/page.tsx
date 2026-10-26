@@ -30,12 +30,14 @@ import {
   proposalSketchesFromDiff,
   proposalSketchesMarkdown,
 } from '@/lib/proposalSketches';
+import { DEFAULT_RPC_URL, RPC_ENDPOINTS } from '@/lib/rpcEndpoints';
 import { buildAccountShareParam, readAccountFromSearch } from '@/lib/shareUrl';
 import { treeOutline } from '@/lib/treeOutline';
 import { PermissionGraph } from '@/lib/types';
 
 export default function PermissionVisualizerPage() {
   const [account, setAccount] = useState('eosio');
+  const [rpcUrl, setRpcUrl] = useState(DEFAULT_RPC_URL);
   const [graph, setGraph] = useState<PermissionGraph>(() => mockSafeGraph('demo'));
   const [baseline, setBaseline] = useState<PermissionGraph | null>(null);
   const [mode, setMode] = useState<'viewer' | 'editor'>('viewer');
@@ -92,10 +94,12 @@ export default function PermissionVisualizerPage() {
   const handleFetchLive = async () => {
     setLoading(true);
     setStatus(null);
-    const r = await fetchPermissionGraph(account);
+    const r = await fetchPermissionGraph(account, rpcUrl);
     setLoading(false);
     if (!r.ok || !r.graph) {
-      setStatus(`Soft-fail: ${r.reason ?? 'unknown'} — keeping current graph`);
+      setStatus(
+        `Soft-fail (${new URL(rpcUrl).hostname}): ${r.reason ?? 'unknown'} — try another RPC`
+      );
       return;
     }
     setGraph(r.graph);
@@ -109,7 +113,7 @@ export default function PermissionVisualizerPage() {
     setStatus(
       `Loaded ${Object.keys(r.graph.permissions).length} permission(s) for ${r.graph.account}` +
         (linkN ? ` · ${linkN} linked_action(s)` : '') +
-        ' (baseline set)'
+        ` via ${new URL(rpcUrl).hostname}`
     );
   };
 
@@ -159,7 +163,7 @@ export default function PermissionVisualizerPage() {
               PERMISSION VISUALIZER
             </div>
             <div className="text-xs opacity-60">
-              Pixel Journey · Pass 13 · educational-reference
+              Pixel Journey · Pass 15 · educational-reference
             </div>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -299,9 +303,8 @@ export default function PermissionVisualizerPage() {
         >
           <p className="font-medium text-sm">Read / plan only</p>
           <p>
-            Soft-fail live <code>get_account</code>. No auto <code>updateauth</code>.{' '}
-            Foreign helpers on owner are social recovery; only this account@active on
-            owner is critical. Share with <code>?a=account</code>.
+            Soft-fail live <code>get_account</code>. Switch RPC if one node is down.
+            No auto <code>updateauth</code>.
           </p>
         </section>
 
@@ -325,13 +328,27 @@ export default function PermissionVisualizerPage() {
           ))}
         </ol>
 
-        <div className="flex gap-3 mb-6">
+        <div className="flex flex-wrap gap-3 mb-6">
           <input
             value={account}
             onChange={(e) => setAccount(e.target.value)}
-            className="flex-1 bg-black/60 border border-white/10 px-4 py-3 rounded-xl font-mono text-sm focus:outline-none focus:border-emerald-400"
+            className="flex-1 min-w-[12rem] bg-black/60 border border-white/10 px-4 py-3 rounded-xl font-mono text-sm focus:outline-none focus:border-emerald-400"
             placeholder="WAX account name"
           />
+          <label className="flex items-center gap-2 text-xs opacity-80">
+            RPC
+            <select
+              value={rpcUrl}
+              onChange={(e) => setRpcUrl(e.target.value)}
+              className="bg-black/60 border border-white/10 px-3 py-3 rounded-xl font-mono text-sm"
+            >
+              {RPC_ENDPOINTS.map((e) => (
+                <option key={e.id} value={e.url}>
+                  {e.label}
+                </option>
+              ))}
+            </select>
+          </label>
           <button
             type="button"
             onClick={handleFetchLive}

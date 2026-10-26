@@ -19,6 +19,7 @@ export {
 export { buildAuditReportMarkdown } from "./auditReport";
 export { nextStepsChecklist } from "./nextSteps";
 export { downloadTextFile } from "./download";
+export { RPC_ENDPOINTS, DEFAULT_RPC_URL, resolveRpcUrl } from "./rpcEndpoints";
 export type {
   PermissionGraph,
   PermissionNode,

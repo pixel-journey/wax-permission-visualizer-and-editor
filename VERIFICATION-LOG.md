@@ -1,10 +1,9 @@
 # Verification Log
 
-**Updated:** 2026-10-26 (Pass 14 — freeze)
+**Updated:** 2026-10-26 (Pass 15)
 
 | Claim | Status |
 | --- | --- |
-| Engines / fixtures / share | unit |
-| Live get_account | soft-fail |
+| RPC list / resolve | unit |
+| Live get_account | soft-fail multi-endpoint |
 | Live updateauth | out of scope |
-| CI | test + typecheck + build |
