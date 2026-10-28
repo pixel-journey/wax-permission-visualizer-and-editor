@@ -30,6 +30,10 @@ export const PERMISSION_GLOSSARY: GlossaryEntry[] = [
     def: "Removes a custom permission. Cannot delete owner or active.",
   },
   {
+    term: "waits",
+    def: "Optional time delays on a permission authority. Signers may need to wait N seconds before the authority path can complete. Does not create missing recovery weight.",
+  },
+  {
     term: "WharfKit",
     def: "Modern Antelope client stack (Session Kit, plugins). Prefer over eosjs / UAL for greenfield dApps.",
   },

@@ -1,9 +1,9 @@
 # Verification Log
 
-**Updated:** 2026-10-28 (Pass 17)
+**Updated:** 2026-10-28 (Pass 18)
 
 | Claim | Status |
 | --- | --- |
-| Glossary | unit |
-| Game linked_actions fixture | present on mockGameLinkedGraph |
+| graphSeverity.reasons | unit |
+| Waits note | educational static |
 | CI | test + typecheck + build |

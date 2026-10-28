@@ -8,6 +8,7 @@ export {
 export { parsePermissionRows, fetchPermissionGraph } from "./parseAccount";
 export { analyzeGraphRisk } from "./graphRisk";
 export { graphSeverity } from "./graphSeverity";
+export type { GraphSeverity } from "./graphSeverity";
 export { exportGraphJson, exportGraphMarkdown } from "./exportGraph";
 export {
   mockSafeGraph,
@@ -28,6 +29,7 @@ export { downloadTextFile } from "./download";
 export { RPC_ENDPOINTS, DEFAULT_RPC_URL, resolveRpcUrl } from "./rpcEndpoints";
 export { PERMISSION_MYTHS } from "./myths";
 export { PERMISSION_GLOSSARY } from "./glossary";
+export { WAITS_EDUCATION } from "./waitsNote";
 export type {
   PermissionGraph,
   PermissionNode,

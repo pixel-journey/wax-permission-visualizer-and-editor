@@ -1,9 +1,9 @@
-# Through Pass 17
+# Through Pass 18
 
 | Pass | Scope |
 |------|--------|
-| 16 | Myths, weight summary |
-| **17** | Glossary, print, linked_actions fixture, JSON download |
+| 17 | Glossary, print, linked fixture |
+| **18** | Severity reasons strip, waits education |
 
 ```bash
 npm install && npm test && npm run build

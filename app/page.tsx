@@ -5,6 +5,8 @@ import { GlossaryPanel } from '@/components/GlossaryPanel';
 import { MythsPanel } from '@/components/MythsPanel';
 import { PermissionTree } from '@/components/PermissionTree';
 import { RelatedBlueprints } from '@/components/RelatedBlueprints';
+import { SeverityStrip } from '@/components/SeverityStrip';
+import { WaitsNote } from '@/components/WaitsNote';
 import { buildAuditReportMarkdown } from '@/lib/auditReport';
 import { downloadTextFile } from '@/lib/download';
 import { exportGraphJson, exportGraphMarkdown } from '@/lib/exportGraph';
@@ -167,7 +169,7 @@ export default function PermissionVisualizerPage() {
               PERMISSION VISUALIZER
             </div>
             <div className="text-xs opacity-60">
-              Pixel Journey · Pass 17 · educational-reference
+              Pixel Journey · Pass 18 · educational-reference
             </div>
           </div>
           <div className="flex flex-wrap gap-2 print:hidden">
@@ -332,25 +334,13 @@ export default function PermissionVisualizerPage() {
           <p className="font-medium text-sm">Read / plan only</p>
           <p>
             Soft-fail live <code>get_account</code>. Switch RPC if one node is down.
-            No auto <code>updateauth</code>. Game claim fixture includes demo{' '}
-            <code>linked_actions</code>.
+            No auto <code>updateauth</code>.
           </p>
         </section>
 
         <MythsPanel />
 
-        <p className="text-sm mb-2">
-          Graph severity:{' '}
-          <span
-            className={
-              severity.label === 'critical' || severity.label === 'high'
-                ? 'text-red-300 font-mono'
-                : 'text-emerald-300 font-mono'
-            }
-          >
-            {severity.score}/100 ({severity.label})
-          </span>
-        </p>
+        <SeverityStrip severity={severity} />
 
         <ol className="mb-6 list-decimal pl-5 text-xs space-y-1 text-white/70 max-w-3xl">
           <li className="list-none -ml-5 opacity-50 mb-1">NEXT STEPS</li>
@@ -601,6 +591,8 @@ export default function PermissionVisualizerPage() {
             )}
           </div>
         </div>
+
+        <WaitsNote />
 
         <GlossaryPanel />
 
