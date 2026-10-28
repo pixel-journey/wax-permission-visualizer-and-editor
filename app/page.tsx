@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useMemo, useState } from 'react';
+import { GlossaryPanel } from '@/components/GlossaryPanel';
 import { MythsPanel } from '@/components/MythsPanel';
 import { PermissionTree } from '@/components/PermissionTree';
 import { RelatedBlueprints } from '@/components/RelatedBlueprints';
@@ -166,10 +167,17 @@ export default function PermissionVisualizerPage() {
               PERMISSION VISUALIZER
             </div>
             <div className="text-xs opacity-60">
-              Pixel Journey · Pass 16 · educational-reference
+              Pixel Journey · Pass 17 · educational-reference
             </div>
           </div>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2 print:hidden">
+            <button
+              type="button"
+              onClick={() => window.print()}
+              className="px-3 py-2 text-sm bg-white/10 rounded-lg"
+            >
+              Print / PDF
+            </button>
             <button
               type="button"
               onClick={() => setMode(mode === 'viewer' ? 'editor' : 'viewer')}
@@ -206,7 +214,10 @@ export default function PermissionVisualizerPage() {
             <button
               type="button"
               onClick={() =>
-                loadFixture(mockGameLinkedGraph(), 'Game claim-session fixture')
+                loadFixture(
+                  mockGameLinkedGraph(),
+                  'Game claim + linked_actions fixture'
+                )
               }
               className="px-3 py-2 text-sm bg-lime-900/40 rounded-lg"
             >
@@ -269,6 +280,20 @@ export default function PermissionVisualizerPage() {
               type="button"
               onClick={() => {
                 downloadTextFile(
+                  `${acct}-graph.json`,
+                  exportGraphJson(graph),
+                  'application/json'
+                );
+                setStatus('Graph JSON downloaded');
+              }}
+              className="px-3 py-2 text-sm bg-sky-950 rounded-lg"
+            >
+              Download JSON
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                downloadTextFile(
                   `${acct}-audit.md`,
                   buildAuditReportMarkdown(graph, baseline),
                   'text/markdown;charset=utf-8'
@@ -307,7 +332,8 @@ export default function PermissionVisualizerPage() {
           <p className="font-medium text-sm">Read / plan only</p>
           <p>
             Soft-fail live <code>get_account</code>. Switch RPC if one node is down.
-            No auto <code>updateauth</code>.
+            No auto <code>updateauth</code>. Game claim fixture includes demo{' '}
+            <code>linked_actions</code>.
           </p>
         </section>
 
@@ -333,7 +359,7 @@ export default function PermissionVisualizerPage() {
           ))}
         </ol>
 
-        <div className="flex flex-wrap gap-3 mb-6">
+        <div className="flex flex-wrap gap-3 mb-6 print:hidden">
           <input
             value={account}
             onChange={(e) => setAccount(e.target.value)}
@@ -365,14 +391,14 @@ export default function PermissionVisualizerPage() {
         </div>
 
         {status && (
-          <p className="text-xs text-emerald-200/80 mb-4" role="status">
+          <p className="text-xs text-emerald-200/80 mb-4 print:hidden" role="status">
             {status}
           </p>
         )}
 
         {graph.linkedActions && graph.linkedActions.length > 0 && (
           <ul className="mb-4 text-xs space-y-1 rounded-xl border border-lime-500/25 bg-lime-500/10 p-4 font-mono">
-            <li className="opacity-60 list-none">LINKED ACTIONS (from RPC if present)</li>
+            <li className="opacity-60 list-none">LINKED ACTIONS</li>
             {graph.linkedActions.map((l, i) => (
               <li key={`${l.account}-${l.action}-${i}`}>
                 {l.permission} → {l.account}::{l.action}
@@ -543,7 +569,7 @@ export default function PermissionVisualizerPage() {
             </div>
 
             {currentNode && (
-              <div className="border border-white/10 bg-black/40 p-5 rounded-2xl">
+              <div className="border border-white/10 bg-black/40 p-5 rounded-2xl print:hidden">
                 <div className="text-xs mb-3 tracking-widest opacity-70">
                   THRESHOLD SIMULATOR
                 </div>
@@ -575,6 +601,8 @@ export default function PermissionVisualizerPage() {
             )}
           </div>
         </div>
+
+        <GlossaryPanel />
 
         <RelatedBlueprints />
       </div>

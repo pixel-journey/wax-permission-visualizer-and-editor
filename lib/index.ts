@@ -27,6 +27,7 @@ export { nextStepsChecklist } from "./nextSteps";
 export { downloadTextFile } from "./download";
 export { RPC_ENDPOINTS, DEFAULT_RPC_URL, resolveRpcUrl } from "./rpcEndpoints";
 export { PERMISSION_MYTHS } from "./myths";
+export { PERMISSION_GLOSSARY } from "./glossary";
 export type {
   PermissionGraph,
   PermissionNode,

@@ -99,7 +99,7 @@ export function mockSocialOwnerGraph(account = "social.demo"): PermissionGraph {
   };
 }
 
-/** Game account: limited claim under active. */
+/** Game account: limited claim under active + demo linked_actions. */
 export function mockGameLinkedGraph(account = "gamer.wam"): PermissionGraph {
   return {
     account,
@@ -126,5 +126,17 @@ export function mockGameLinkedGraph(account = "gamer.wam"): PermissionGraph {
         accounts: [],
       },
     },
+    linkedActions: [
+      {
+        account: "pxfarmer.game",
+        action: "claim",
+        permission: "claim",
+      },
+      {
+        account: "pxfarmer.game",
+        action: "harvest",
+        permission: "claim",
+      },
+    ],
   };
 }

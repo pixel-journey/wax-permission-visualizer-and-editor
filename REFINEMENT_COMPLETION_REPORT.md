@@ -1,9 +1,9 @@
-# Through Pass 16
+# Through Pass 17
 
 | Pass | Scope |
 |------|--------|
-| 15 | RPC chooser |
-| **16** | Myths panel, `nodeWeightSummary`, validateProposedChange fix |
+| 16 | Myths, weight summary |
+| **17** | Glossary, print, linked_actions fixture, JSON download |
 
 ```bash
 npm install && npm test && npm run build

@@ -1,7 +1,7 @@
 # wax-permission-visualizer-and-editor
 
 > **Trust label:** `educational-reference`  
-> **Status:** Passes **1–16** (2026-10-28)
+> **Status:** Passes **1–17** (2026-10-28)
 
 Permission tree visualizer + risk analysis for WAX.
 
@@ -9,7 +9,7 @@ Permission tree visualizer + risk analysis for WAX.
 npm install && npm test && npm run build && npm run dev
 ```
 
-**Pass 16:** Myths panel · selected-node weight summary · `validateProposedChange` aligned with same-account active-on-owner rule.
+**Pass 17:** Glossary · Print/PDF · Game fixture with demo `linked_actions` · Download graph JSON.
 
 [EDUCATION.md](./EDUCATION.md) · [POLICY.md](./POLICY.md)
 
