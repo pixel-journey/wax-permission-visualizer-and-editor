@@ -1,4 +1,10 @@
-export { calculateThreshold, canSatisfyPermission, validateProposedChange } from "./permissionEngine";
+export {
+  calculateThreshold,
+  canSatisfyPermission,
+  validateProposedChange,
+  totalAuthWeight,
+  nodeWeightSummary,
+} from "./permissionEngine";
 export { parsePermissionRows, fetchPermissionGraph } from "./parseAccount";
 export { analyzeGraphRisk } from "./graphRisk";
 export { graphSeverity } from "./graphSeverity";
@@ -20,6 +26,7 @@ export { buildAuditReportMarkdown } from "./auditReport";
 export { nextStepsChecklist } from "./nextSteps";
 export { downloadTextFile } from "./download";
 export { RPC_ENDPOINTS, DEFAULT_RPC_URL, resolveRpcUrl } from "./rpcEndpoints";
+export { PERMISSION_MYTHS } from "./myths";
 export type {
   PermissionGraph,
   PermissionNode,

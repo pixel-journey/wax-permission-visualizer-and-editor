@@ -1,9 +1,9 @@
 # Verification Log
 
-**Updated:** 2026-10-26 (Pass 15)
+**Updated:** 2026-10-28 (Pass 16)
 
 | Claim | Status |
 | --- | --- |
-| RPC list / resolve | unit |
-| Live get_account | soft-fail multi-endpoint |
-| Live updateauth | out of scope |
+| nodeWeightSummary / validate rule | unit |
+| Myths catalog | unit |
+| CI | test + typecheck + build |

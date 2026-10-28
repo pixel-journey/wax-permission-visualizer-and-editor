@@ -1,7 +1,7 @@
 # wax-permission-visualizer-and-editor
 
 > **Trust label:** `educational-reference`  
-> **Status:** Passes **1–15** (frozen core + post-freeze RPC chooser, 2026-10-26)
+> **Status:** Passes **1–16** (2026-10-28)
 
 Permission tree visualizer + risk analysis for WAX.
 
@@ -9,7 +9,7 @@ Permission tree visualizer + risk analysis for WAX.
 npm install && npm test && npm run build && npm run dev
 ```
 
-Core freeze: Pass 14. **Pass 15:** multi-RPC soft-fail `get_account` (Greymass / EOSrio / EOSphere / Pink).
+**Pass 16:** Myths panel · selected-node weight summary · `validateProposedChange` aligned with same-account active-on-owner rule.
 
 [EDUCATION.md](./EDUCATION.md) · [POLICY.md](./POLICY.md)
 

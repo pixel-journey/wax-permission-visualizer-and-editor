@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useMemo, useState } from 'react';
+import { MythsPanel } from '@/components/MythsPanel';
 import { PermissionTree } from '@/components/PermissionTree';
 import { RelatedBlueprints } from '@/components/RelatedBlueprints';
 import { buildAuditReportMarkdown } from '@/lib/auditReport';
@@ -24,6 +25,7 @@ import { nextStepsChecklist } from '@/lib/nextSteps';
 import { fetchPermissionGraph } from '@/lib/parseAccount';
 import {
   calculateThreshold,
+  nodeWeightSummary,
   validateProposedChange,
 } from '@/lib/permissionEngine';
 import {
@@ -148,6 +150,7 @@ export default function PermissionVisualizerPage() {
   };
 
   const currentNode = selectedNode ? graph.permissions[selectedNode] : null;
+  const weightSum = currentNode ? nodeWeightSummary(currentNode) : null;
   const simResult = currentNode
     ? calculateThreshold(currentNode, simulationKeys)
     : null;
@@ -163,7 +166,7 @@ export default function PermissionVisualizerPage() {
               PERMISSION VISUALIZER
             </div>
             <div className="text-xs opacity-60">
-              Pixel Journey · Pass 15 · educational-reference
+              Pixel Journey · Pass 16 · educational-reference
             </div>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -307,6 +310,8 @@ export default function PermissionVisualizerPage() {
             No auto <code>updateauth</code>.
           </p>
         </section>
+
+        <MythsPanel />
 
         <p className="text-sm mb-2">
           Graph severity:{' '}
@@ -481,6 +486,21 @@ export default function PermissionVisualizerPage() {
                   <div className="text-sm opacity-70 mb-1">
                     Threshold: {currentNode.threshold}
                   </div>
+                  {weightSum && (
+                    <div
+                      className={`text-xs font-mono mb-3 rounded-lg px-2 py-1.5 ${
+                        weightSum.satisfiable
+                          ? 'bg-emerald-500/10 text-emerald-300'
+                          : 'bg-red-500/10 text-red-300'
+                      }`}
+                    >
+                      weight {weightSum.total} (keys {weightSum.keyWeight} + accts{' '}
+                      {weightSum.accountWeight}) · thr {weightSum.threshold}
+                      {weightSum.satisfiable
+                        ? ` · surplus ${weightSum.surplus}`
+                        : ' · UNSATISFIABLE'}
+                    </div>
+                  )}
                   {currentNode.parent && (
                     <div className="text-xs opacity-50 mb-4">
                       Parent: {currentNode.parent}

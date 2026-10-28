@@ -1,11 +1,9 @@
-# Through Pass 15
+# Through Pass 16
 
 | Pass | Scope |
 |------|--------|
-| 14 | Scope freeze |
-| **15** | RPC endpoint chooser (additive) |
-
-Core non-goals unchanged (no live authority broadcast).
+| 15 | RPC chooser |
+| **16** | Myths panel, `nodeWeightSummary`, validateProposedChange fix |
 
 ```bash
 npm install && npm test && npm run build

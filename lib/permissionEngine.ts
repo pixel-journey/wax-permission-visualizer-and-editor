@@ -48,11 +48,32 @@ export function calculateThreshold(
   };
 }
 
-function totalAuthWeight(p: PermissionNode): number {
+export function totalAuthWeight(p: PermissionNode): number {
   return (
     p.keys.reduce((sum, k) => sum + k.weight, 0) +
     p.accounts.reduce((sum, a) => sum + a.weight, 0)
   );
+}
+
+export function nodeWeightSummary(p: PermissionNode): {
+  keyWeight: number;
+  accountWeight: number;
+  total: number;
+  threshold: number;
+  surplus: number;
+  satisfiable: boolean;
+} {
+  const keyWeight = p.keys.reduce((s, k) => s + k.weight, 0);
+  const accountWeight = p.accounts.reduce((s, a) => s + a.weight, 0);
+  const total = keyWeight + accountWeight;
+  return {
+    keyWeight,
+    accountWeight,
+    total,
+    threshold: p.threshold,
+    surplus: total - p.threshold,
+    satisfiable: total >= p.threshold,
+  };
 }
 
 /**
@@ -66,6 +87,7 @@ export function validateProposedChange(
   const warnings: ChangeWarning[] = [];
   const currentOwner = current.permissions["owner"];
   const proposedOwner = proposed.permissions["owner"];
+  const acct = proposed.account;
 
   if (proposedOwner && proposedOwner.threshold < 1) {
     warnings.push({
@@ -98,10 +120,14 @@ export function validateProposedChange(
   }
 
   for (const a of proposedOwner?.accounts ?? []) {
-    if (a.permission.permission === "active") {
+    // Only *this* account's active on owner is the classic anti-pattern.
+    if (
+      a.permission.actor === acct &&
+      a.permission.permission === "active"
+    ) {
       warnings.push({
         level: "danger",
-        message: `Proposed owner includes ${a.permission.actor}@active — active must not control owner`,
+        message: `Proposed owner includes ${acct}@active — this account's active must not control its own owner`,
         affectedPermission: "owner",
       });
     }

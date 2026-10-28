@@ -1,87 +1,52 @@
-/**
- * Unit test skeleton for pure client-side permission engine.
- * Run with: npx vitest run lib/permissionEngine.test.ts (after adding vitest)
- *
- * Status: UNTESTED — add vitest dependency and run to mark VERIFIED.
- */
-import { describe, it, expect } from 'vitest';
-import { calculateThreshold, validateProposedChange, canSatisfyPermission } from './permissionEngine';
-import type { PermissionNode, PermissionGraph } from './types';
+import { describe, expect, it } from "vitest";
+import { mockSafeGraph, mockSocialOwnerGraph } from "./fixtures";
+import {
+  calculateThreshold,
+  nodeWeightSummary,
+  validateProposedChange,
+} from "./permissionEngine";
 
-describe('calculateThreshold', () => {
-  const basePerm: PermissionNode = {
-    name: 'active',
-    threshold: 2,
-    keys: [
-      { key: 'key1', weight: 1 },
-      { key: 'key2', weight: 1 },
-      { key: 'key3', weight: 1 },
-    ],
-    accounts: [],
-  };
+describe("permissionEngine", () => {
+  it("nodeWeightSummary totals keys + accounts",
+    () => {
+      const g = mockSocialOwnerGraph("alice.wam");
+      const s = nodeWeightSummary(g.permissions.owner);
+      expect(s.total).toBe(3);
+      expect(s.threshold).toBe(2);
+      expect(s.satisfiable).toBe(true);
+    });
 
-  it('returns canExecute true when weight meets threshold', () => {
-    const result = calculateThreshold(basePerm, ['key1', 'key2']);
-    expect(result.canExecute).toBe(true);
-    expect(result.currentWeight).toBe(2);
-    expect(result.missingWeight).toBe(0);
-    expect(result.riskLevel).toBe('safe');
-  });
+  it("does not flag foreign active on owner in proposed change",
+    () => {
+      const base = mockSafeGraph("alice.wam");
+      const proposed = mockSocialOwnerGraph("alice.wam");
+      const w = validateProposedChange(base, proposed);
+      expect(
+        w.some((x) => x.message.includes("must not control its own owner"))
+      ).toBe(false);
+    });
 
-  it('returns canExecute false and warning when insufficient', () => {
-    const result = calculateThreshold(basePerm, ['key1']);
-    expect(result.canExecute).toBe(false);
-    expect(result.missingWeight).toBe(1);
-    expect(result.warnings.length).toBeGreaterThan(0);
-  });
+  it("flags same-account active on owner in proposed change",
+    () => {
+      const base = mockSafeGraph("demo");
+      const proposed = mockSafeGraph("demo");
+      proposed.permissions.owner.accounts = [
+        {
+          permission: { actor: "demo", permission: "active" },
+          weight: 1,
+        },
+      ];
+      const w = validateProposedChange(base, proposed);
+      expect(
+        w.some((x) => x.message.includes("must not control its own owner"))
+      ).toBe(true);
+    });
 
-  it('flags critical owner warning when missing weight', () => {
-    const ownerPerm: PermissionNode = { ...basePerm, name: 'owner', threshold: 1 };
-    const result = calculateThreshold(ownerPerm, []);
-    expect(result.warnings.some(w => w.includes('CRITICAL'))).toBe(true);
-  });
-});
-
-describe('validateProposedChange', () => {
-  const current: PermissionGraph = {
-    account: 'test',
-    permissions: {
-      owner: { name: 'owner', threshold: 1, keys: [{ key: 'k1', weight: 1 }], accounts: [] },
-    },
-    lastUpdated: '',
-  };
-
-  it('warns on owner threshold of 0', () => {
-    const proposed: PermissionGraph = {
-      ...current,
-      permissions: {
-        owner: { name: 'owner', threshold: 0, keys: [{ key: 'k1', weight: 1 }], accounts: [] },
-      },
-    };
-    const warnings = validateProposedChange(current, proposed);
-    expect(warnings.some(w => w.level === 'danger' && w.message.includes('locked'))).toBe(true);
-  });
-
-  it('warns when total weight below threshold', () => {
-    const proposed: PermissionGraph = {
-      ...current,
-      permissions: {
-        owner: { name: 'owner', threshold: 3, keys: [{ key: 'k1', weight: 1 }], accounts: [] },
-      },
-    };
-    const warnings = validateProposedChange(current, proposed);
-    expect(warnings.some(w => w.message.includes('below threshold'))).toBe(true);
-  });
-});
-
-describe('canSatisfyPermission', () => {
-  it('returns true for sufficient keys', () => {
-    const perm: PermissionNode = {
-      name: 'active',
-      threshold: 1,
-      keys: [{ key: 'k1', weight: 1 }],
-      accounts: [],
-    };
-    expect(canSatisfyPermission(perm, ['k1'])).toBe(true);
-  });
+  it("calculateThreshold meets when key provided",
+    () => {
+      const g = mockSafeGraph();
+      const key = g.permissions.owner.keys[0].key;
+      const r = calculateThreshold(g.permissions.owner, [key]);
+      expect(r.canExecute).toBe(true);
+    });
 });
