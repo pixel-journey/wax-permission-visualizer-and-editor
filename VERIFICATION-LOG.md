@@ -1,9 +1,9 @@
 # Verification Log
 
-**Updated:** 2026-10-28 (Pass 18)
+**Updated:** 2026-10-30 (Pass 19)
 
 | Claim | Status |
 | --- | --- |
-| graphSeverity.reasons | unit |
-| Waits note | educational static |
+| account-auth threshold weight | unit |
+| Audit severity reasons | present in buildAuditReportMarkdown |
 | CI | test + typecheck + build |

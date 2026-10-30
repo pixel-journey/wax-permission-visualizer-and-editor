@@ -9,18 +9,42 @@ import {
   ChangeWarning,
 } from "./types";
 
+export type SimulateAuthInput = {
+  /** Public keys contributing weight */
+  keys?: string[];
+  /** "actor@permission" strings matching account authorities */
+  accounts?: string[];
+};
+
+function accountTag(actor: string, permission: string): string {
+  return `${actor}@${permission}`;
+}
+
 export function calculateThreshold(
   permission: PermissionNode,
-  providedKeys: string[]
+  providedKeys: string[],
+  providedAccounts: string[] = []
 ): SimulationResult {
   let currentWeight = 0;
   const satisfiedKeys: string[] = [];
   const warnings: string[] = [];
+  const accountSet = new Set(
+    providedAccounts.map((a) => a.trim().toLowerCase()).filter(Boolean)
+  );
 
   permission.keys.forEach((k) => {
     if (providedKeys.includes(k.key)) {
       currentWeight += k.weight;
       satisfiedKeys.push(k.key);
+    }
+  });
+
+  const satisfiedAccounts: string[] = [];
+  permission.accounts.forEach((a) => {
+    const tag = accountTag(a.permission.actor, a.permission.permission);
+    if (accountSet.has(tag.toLowerCase())) {
+      currentWeight += a.weight;
+      satisfiedAccounts.push(tag);
     }
   });
 
@@ -30,11 +54,17 @@ export function calculateThreshold(
   if (permission.name === "owner" && missingWeight > 0) {
     warnings.push("CRITICAL: Owner permission — losing all keys is irreversible");
   }
-  if (currentWeight === 0 && permission.keys.length > 0) {
-    warnings.push("No matching keys provided for this permission");
+  if (
+    currentWeight === 0 &&
+    (permission.keys.length > 0 || permission.accounts.length > 0)
+  ) {
+    warnings.push("No matching keys or account authorities provided");
   }
   if (missingWeight > 0 && permission.threshold > 1) {
     warnings.push(`Missing ${missingWeight} weight to meet threshold`);
+  }
+  if (satisfiedAccounts.length) {
+    warnings.push(`Account auth matched: ${satisfiedAccounts.join(", ")}`);
   }
 
   return {
@@ -76,10 +106,6 @@ export function nodeWeightSummary(p: PermissionNode): {
   };
 }
 
-/**
- * Validates a proposed permission graph against a baseline (e.g. on-chain).
- * Empty array does not mean "safe to broadcast" — only that known heuristics passed.
- */
 export function validateProposedChange(
   current: PermissionGraph,
   proposed: PermissionGraph
@@ -120,7 +146,6 @@ export function validateProposedChange(
   }
 
   for (const a of proposedOwner?.accounts ?? []) {
-    // Only *this* account's active on owner is the classic anti-pattern.
     if (
       a.permission.actor === acct &&
       a.permission.permission === "active"
@@ -150,7 +175,8 @@ export function validateProposedChange(
 
 export function canSatisfyPermission(
   permission: PermissionNode,
-  keys: string[]
+  keys: string[],
+  accounts: string[] = []
 ): boolean {
-  return calculateThreshold(permission, keys).canExecute;
+  return calculateThreshold(permission, keys, accounts).canExecute;
 }

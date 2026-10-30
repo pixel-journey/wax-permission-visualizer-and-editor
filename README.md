@@ -1,7 +1,7 @@
 # wax-permission-visualizer-and-editor
 
 > **Trust label:** `educational-reference`  
-> **Status:** Passes **1–18** (2026-10-28)
+> **Status:** Passes **1–19** (2026-10-30)
 
 Permission tree visualizer + risk analysis for WAX.
 
@@ -9,7 +9,7 @@ Permission tree visualizer + risk analysis for WAX.
 npm install && npm test && npm run build && npm run dev
 ```
 
-**Pass 18:** Severity strip with scored reasons · waits (time-delay) education note.
+**Pass 19:** Threshold simulator includes **account-auth** (`actor@permission`); audit export embeds severity reasons + linked actions.
 
 [EDUCATION.md](./EDUCATION.md) · [POLICY.md](./POLICY.md)
 

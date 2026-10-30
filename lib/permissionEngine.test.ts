@@ -16,6 +16,20 @@ describe("permissionEngine", () => {
       expect(s.satisfiable).toBe(true);
     });
 
+  it("account-auth contributes to threshold",
+    () => {
+      const g = mockSocialOwnerGraph("alice.wam");
+      const alone = calculateThreshold(g.permissions.owner, [], []);
+      expect(alone.canExecute).toBe(false);
+      const withBob = calculateThreshold(
+        g.permissions.owner,
+        ["PUB_K1_SELF"],
+        ["bob.wam@active"]
+      );
+      expect(withBob.canExecute).toBe(true);
+      expect(withBob.currentWeight).toBe(2);
+    });
+
   it("does not flag foreign active on owner in proposed change",
     () => {
       const base = mockSafeGraph("alice.wam");
@@ -40,13 +54,5 @@ describe("permissionEngine", () => {
       expect(
         w.some((x) => x.message.includes("must not control its own owner"))
       ).toBe(true);
-    });
-
-  it("calculateThreshold meets when key provided",
-    () => {
-      const g = mockSafeGraph();
-      const key = g.permissions.owner.keys[0].key;
-      const r = calculateThreshold(g.permissions.owner, [key]);
-      expect(r.canExecute).toBe(true);
     });
 });

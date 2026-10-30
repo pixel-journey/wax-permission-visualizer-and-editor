@@ -48,6 +48,7 @@ export default function PermissionVisualizerPage() {
   const [mode, setMode] = useState<'viewer' | 'editor'>('viewer');
   const [selectedNode, setSelectedNode] = useState<string | null>('owner');
   const [simulationKeys, setSimulationKeys] = useState<string[]>([]);
+  const [simulationAccounts, setSimulationAccounts] = useState<string[]>([]);
   const [status, setStatus] = useState<string | null>('Mock safe graph loaded');
   const [loading, setLoading] = useState(false);
 
@@ -93,6 +94,8 @@ export default function PermissionVisualizerPage() {
     setSelectedNode(
       g.permissions.owner ? 'owner' : Object.keys(g.permissions)[0] ?? null
     );
+    setSimulationKeys([]);
+    setSimulationAccounts([]);
     setStatus(label);
   };
 
@@ -155,7 +158,7 @@ export default function PermissionVisualizerPage() {
   const currentNode = selectedNode ? graph.permissions[selectedNode] : null;
   const weightSum = currentNode ? nodeWeightSummary(currentNode) : null;
   const simResult = currentNode
-    ? calculateThreshold(currentNode, simulationKeys)
+    ? calculateThreshold(currentNode, simulationKeys, simulationAccounts)
     : null;
 
   const acct = graph.account || account || 'account';
@@ -169,231 +172,59 @@ export default function PermissionVisualizerPage() {
               PERMISSION VISUALIZER
             </div>
             <div className="text-xs opacity-60">
-              Pixel Journey · Pass 18 · educational-reference
+              Pixel Journey · Pass 19 · educational-reference
             </div>
           </div>
           <div className="flex flex-wrap gap-2 print:hidden">
-            <button
-              type="button"
-              onClick={() => window.print()}
-              className="px-3 py-2 text-sm bg-white/10 rounded-lg"
-            >
-              Print / PDF
-            </button>
-            <button
-              type="button"
-              onClick={() => setMode(mode === 'viewer' ? 'editor' : 'viewer')}
-              className="px-3 py-2 text-sm border border-white/20 rounded-lg"
-            >
-              {mode === 'viewer' ? 'Editor' : 'Viewer'}
-            </button>
-            <button
-              type="button"
-              onClick={() => loadFixture(mockSafeGraph('demo'), 'Safe mock')}
-              className="px-3 py-2 text-sm bg-white/10 rounded-lg"
-            >
-              Safe
-            </button>
-            <button
-              type="button"
-              onClick={() => loadFixture(mockUnsafeGraph(), 'Unsafe fixture')}
-              className="px-3 py-2 text-sm bg-red-900/50 rounded-lg"
-            >
-              Unsafe
-            </button>
-            <button
-              type="button"
-              onClick={() =>
-                loadFixture(
-                  mockSocialOwnerGraph('alice.wam'),
-                  'Social 2-of-3 owner fixture'
-                )
-              }
-              className="px-3 py-2 text-sm bg-cyan-900/50 rounded-lg"
-            >
-              Social owner
-            </button>
-            <button
-              type="button"
-              onClick={() =>
-                loadFixture(
-                  mockGameLinkedGraph(),
-                  'Game claim + linked_actions fixture'
-                )
-              }
-              className="px-3 py-2 text-sm bg-lime-900/40 rounded-lg"
-            >
-              Game claim
-            </button>
-            <button
-              type="button"
-              onClick={() => void copyShare()}
-              className="px-3 py-2 text-sm bg-teal-800 rounded-lg"
-            >
-              Copy share URL
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setBaseline(graph);
-                setStatus('Baseline snapshot set');
-              }}
-              className="px-3 py-2 text-sm bg-violet-800 rounded-lg"
-            >
-              Set baseline
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                const r = saveGraphDraft(graph);
-                setStatus(r.ok ? 'Draft saved' : `Save failed: ${r.reason}`);
-              }}
-              className="px-3 py-2 text-sm bg-violet-700 rounded-lg"
-            >
-              Save draft
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                clearGraphDraft();
-                setStatus('Draft cleared');
-              }}
-              className="px-3 py-2 text-sm bg-white/10 rounded-lg"
-            >
-              Clear draft
-            </button>
-            <button
-              type="button"
-              onClick={() =>
-                copy(exportGraphMarkdown(graph), 'Markdown export copied')
-              }
-              className="px-3 py-2 text-sm bg-sky-800 rounded-lg"
-            >
-              Copy MD
-            </button>
-            <button
-              type="button"
-              onClick={() => copy(exportGraphJson(graph), 'JSON export copied')}
-              className="px-3 py-2 text-sm bg-sky-900 rounded-lg"
-            >
-              Copy JSON
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                downloadTextFile(
-                  `${acct}-graph.json`,
-                  exportGraphJson(graph),
-                  'application/json'
-                );
-                setStatus('Graph JSON downloaded');
-              }}
-              className="px-3 py-2 text-sm bg-sky-950 rounded-lg"
-            >
-              Download JSON
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                downloadTextFile(
-                  `${acct}-audit.md`,
-                  buildAuditReportMarkdown(graph, baseline),
-                  'text/markdown;charset=utf-8'
-                );
-                setStatus('Audit report downloaded');
-              }}
-              className="px-3 py-2 text-sm bg-emerald-900 rounded-lg"
-            >
-              Download audit.md
-            </button>
+            <button type="button" onClick={() => window.print()} className="px-3 py-2 text-sm bg-white/10 rounded-lg">Print / PDF</button>
+            <button type="button" onClick={() => setMode(mode === 'viewer' ? 'editor' : 'viewer')} className="px-3 py-2 text-sm border border-white/20 rounded-lg">{mode === 'viewer' ? 'Editor' : 'Viewer'}</button>
+            <button type="button" onClick={() => loadFixture(mockSafeGraph('demo'), 'Safe mock')} className="px-3 py-2 text-sm bg-white/10 rounded-lg">Safe</button>
+            <button type="button" onClick={() => loadFixture(mockUnsafeGraph(), 'Unsafe fixture')} className="px-3 py-2 text-sm bg-red-900/50 rounded-lg">Unsafe</button>
+            <button type="button" onClick={() => loadFixture(mockSocialOwnerGraph('alice.wam'), 'Social 2-of-3 owner fixture')} className="px-3 py-2 text-sm bg-cyan-900/50 rounded-lg">Social owner</button>
+            <button type="button" onClick={() => loadFixture(mockGameLinkedGraph(), 'Game claim + linked_actions fixture')} className="px-3 py-2 text-sm bg-lime-900/40 rounded-lg">Game claim</button>
+            <button type="button" onClick={() => void copyShare()} className="px-3 py-2 text-sm bg-teal-800 rounded-lg">Copy share URL</button>
+            <button type="button" onClick={() => { setBaseline(graph); setStatus('Baseline snapshot set'); }} className="px-3 py-2 text-sm bg-violet-800 rounded-lg">Set baseline</button>
+            <button type="button" onClick={() => { const r = saveGraphDraft(graph); setStatus(r.ok ? 'Draft saved' : `Save failed: ${r.reason}`); }} className="px-3 py-2 text-sm bg-violet-700 rounded-lg">Save draft</button>
+            <button type="button" onClick={() => { clearGraphDraft(); setStatus('Draft cleared'); }} className="px-3 py-2 text-sm bg-white/10 rounded-lg">Clear draft</button>
+            <button type="button" onClick={() => copy(exportGraphMarkdown(graph), 'Markdown export copied')} className="px-3 py-2 text-sm bg-sky-800 rounded-lg">Copy MD</button>
+            <button type="button" onClick={() => copy(exportGraphJson(graph), 'JSON export copied')} className="px-3 py-2 text-sm bg-sky-900 rounded-lg">Copy JSON</button>
+            <button type="button" onClick={() => { downloadTextFile(`${acct}-graph.json`, exportGraphJson(graph), 'application/json'); setStatus('Graph JSON downloaded'); }} className="px-3 py-2 text-sm bg-sky-950 rounded-lg">Download JSON</button>
+            <button type="button" onClick={() => { downloadTextFile(`${acct}-audit.md`, buildAuditReportMarkdown(graph, baseline), 'text/markdown;charset=utf-8'); setStatus('Audit report downloaded'); }} className="px-3 py-2 text-sm bg-emerald-900 rounded-lg">Download audit.md</button>
             {baseline && (
-              <button
-                type="button"
-                onClick={() =>
-                  copy(
-                    proposalSketchesMarkdown(
-                      graph.account || account,
-                      baseline,
-                      graph
-                    ),
-                    'Proposal sketches copied (not for broadcast)'
-                  )
-                }
-                className="px-3 py-2 text-sm bg-amber-900/60 rounded-lg"
-              >
-                Copy proposal sketches
-              </button>
+              <button type="button" onClick={() => copy(proposalSketchesMarkdown(graph.account || account, baseline, graph), 'Proposal sketches copied (not for broadcast)')} className="px-3 py-2 text-sm bg-amber-900/60 rounded-lg">Copy proposal sketches</button>
             )}
           </div>
         </div>
 
-        <section
-          className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4 text-xs text-amber-100/90 space-y-2 mb-6 max-w-3xl"
-          role="note"
-        >
+        <section className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4 text-xs text-amber-100/90 space-y-2 mb-6 max-w-3xl" role="note">
           <p className="font-medium text-sm">Read / plan only</p>
-          <p>
-            Soft-fail live <code>get_account</code>. Switch RPC if one node is down.
-            No auto <code>updateauth</code>.
-          </p>
+          <p>Soft-fail live <code>get_account</code>. Threshold sim accepts keys <em>and</em> <code>actor@permission</code> tags.</p>
         </section>
 
         <MythsPanel />
-
         <SeverityStrip severity={severity} />
 
         <ol className="mb-6 list-decimal pl-5 text-xs space-y-1 text-white/70 max-w-3xl">
           <li className="list-none -ml-5 opacity-50 mb-1">NEXT STEPS</li>
-          {steps.map((s) => (
-            <li key={s}>{s}</li>
-          ))}
+          {steps.map((s) => (<li key={s}>{s}</li>))}
         </ol>
 
         <div className="flex flex-wrap gap-3 mb-6 print:hidden">
-          <input
-            value={account}
-            onChange={(e) => setAccount(e.target.value)}
-            className="flex-1 min-w-[12rem] bg-black/60 border border-white/10 px-4 py-3 rounded-xl font-mono text-sm focus:outline-none focus:border-emerald-400"
-            placeholder="WAX account name"
-          />
-          <label className="flex items-center gap-2 text-xs opacity-80">
-            RPC
-            <select
-              value={rpcUrl}
-              onChange={(e) => setRpcUrl(e.target.value)}
-              className="bg-black/60 border border-white/10 px-3 py-3 rounded-xl font-mono text-sm"
-            >
-              {RPC_ENDPOINTS.map((e) => (
-                <option key={e.id} value={e.url}>
-                  {e.label}
-                </option>
-              ))}
+          <input value={account} onChange={(e) => setAccount(e.target.value)} className="flex-1 min-w-[12rem] bg-black/60 border border-white/10 px-4 py-3 rounded-xl font-mono text-sm" placeholder="WAX account name" />
+          <label className="flex items-center gap-2 text-xs opacity-80">RPC
+            <select value={rpcUrl} onChange={(e) => setRpcUrl(e.target.value)} className="bg-black/60 border border-white/10 px-3 py-3 rounded-xl font-mono text-sm">
+              {RPC_ENDPOINTS.map((e) => (<option key={e.id} value={e.url}>{e.label}</option>))}
             </select>
           </label>
-          <button
-            type="button"
-            onClick={handleFetchLive}
-            disabled={loading}
-            className="px-8 py-3 bg-emerald-700 hover:bg-emerald-600 rounded-xl text-sm disabled:opacity-50"
-          >
-            {loading ? 'Loading…' : 'Load get_account'}
-          </button>
+          <button type="button" onClick={handleFetchLive} disabled={loading} className="px-8 py-3 bg-emerald-700 hover:bg-emerald-600 rounded-xl text-sm disabled:opacity-50">{loading ? 'Loading…' : 'Load get_account'}</button>
         </div>
 
-        {status && (
-          <p className="text-xs text-emerald-200/80 mb-4 print:hidden" role="status">
-            {status}
-          </p>
-        )}
+        {status && <p className="text-xs text-emerald-200/80 mb-4 print:hidden" role="status">{status}</p>}
 
         {graph.linkedActions && graph.linkedActions.length > 0 && (
           <ul className="mb-4 text-xs space-y-1 rounded-xl border border-lime-500/25 bg-lime-500/10 p-4 font-mono">
             <li className="opacity-60 list-none">LINKED ACTIONS</li>
-            {graph.linkedActions.map((l, i) => (
-              <li key={`${l.account}-${l.action}-${i}`}>
-                {l.permission} → {l.account}::{l.action}
-              </li>
-            ))}
+            {graph.linkedActions.map((l, i) => (<li key={`${l.account}-${l.action}-${i}`}>{l.permission} → {l.account}::{l.action}</li>))}
           </ul>
         )}
 
@@ -401,18 +232,7 @@ export default function PermissionVisualizerPage() {
           <ul className="mb-4 text-xs space-y-1 rounded-xl border border-amber-500/20 bg-amber-500/5 p-4">
             <li className="opacity-60">GRAPH RISK</li>
             {risks.map((w) => (
-              <li
-                key={w.message}
-                className={
-                  w.level === 'danger'
-                    ? 'text-red-300'
-                    : w.level === 'warning'
-                      ? 'text-amber-300'
-                      : 'text-white/50'
-                }
-              >
-                [{w.level}] {w.message}
-              </li>
+              <li key={w.message} className={w.level === 'danger' ? 'text-red-300' : w.level === 'warning' ? 'text-amber-300' : 'text-white/50'}>[{w.level}] {w.message}</li>
             ))}
           </ul>
         )}
@@ -420,40 +240,21 @@ export default function PermissionVisualizerPage() {
         {changeWarnings.length > 0 && (
           <ul className="mb-4 text-xs space-y-1 rounded-xl border border-red-500/30 bg-red-500/10 p-4">
             <li className="opacity-60">PROPOSED CHANGE vs BASELINE</li>
-            {changeWarnings.map((w) => (
-              <li
-                key={w.message}
-                className={w.level === 'danger' ? 'text-red-300' : 'text-amber-300'}
-              >
-                [{w.level}] {w.message}
-              </li>
-            ))}
+            {changeWarnings.map((w) => (<li key={w.message} className={w.level === 'danger' ? 'text-red-300' : 'text-amber-300'}>[{w.level}] {w.message}</li>))}
           </ul>
         )}
 
         {baseline && diffLines.some((l) => l.kind !== 'same') && (
           <ul className="mb-4 text-xs space-y-1 rounded-xl border border-sky-500/20 bg-sky-500/5 p-4 font-mono">
             <li className="opacity-60 mb-1">DIFF vs baseline</li>
-            {diffLines
-              .filter((l) => l.kind !== 'same')
-              .map((l) => (
-                <li key={`${l.permission}-${l.kind}`}>
-                  [{l.kind}] {l.permission}: {l.detail}
-                </li>
-              ))}
+            {diffLines.filter((l) => l.kind !== 'same').map((l) => (<li key={`${l.permission}-${l.kind}`}>[{l.kind}] {l.permission}: {l.detail}</li>))}
           </ul>
         )}
 
         {sketches.length > 0 && (
           <ol className="mb-6 list-decimal pl-5 text-xs space-y-1 rounded-xl border border-violet-500/25 bg-violet-500/10 p-4 font-mono text-violet-100/90">
-            <li className="list-none opacity-60 -ml-5 mb-1">
-              PROPOSAL SKETCHES (not sent)
-            </li>
-            {sketches.map((s) => (
-              <li key={s.summary}>
-                {s.account}::{s.name} — {s.summary}
-              </li>
-            ))}
+            <li className="list-none opacity-60 -ml-5 mb-1">PROPOSAL SKETCHES (not sent)</li>
+            {sketches.map((s) => (<li key={s.summary}>{s.account}::{s.name} — {s.summary}</li>))}
           </ol>
         )}
 
@@ -461,28 +262,15 @@ export default function PermissionVisualizerPage() {
           <div className="lg:col-span-8 space-y-4">
             <div className="mb-2 flex items-center justify-between text-xs opacity-70">
               <div>INTERACTIVE PERMISSION TREE</div>
-              <div className="font-mono">
-                {graph.account} · {Object.keys(graph.permissions).length} permissions
-              </div>
+              <div className="font-mono">{graph.account} · {Object.keys(graph.permissions).length} permissions</div>
             </div>
-            <PermissionTree
-              graph={graph}
-              mode={mode}
-              onUpdate={handleUpdate}
-              selectedNode={selectedNode}
-              onSelectNode={setSelectedNode}
-            />
+            <PermissionTree graph={graph} mode={mode} onUpdate={handleUpdate} selectedNode={selectedNode} onSelectNode={setSelectedNode} />
             <div className="border border-white/10 bg-black/30 rounded-xl p-4 text-xs font-mono">
               <div className="opacity-60 mb-2 tracking-widest text-[10px]">OUTLINE</div>
               <ul className="space-y-1">
                 {outline.map((l) => (
                   <li key={l.name}>
-                    <button
-                      type="button"
-                      className="text-left hover:text-emerald-400"
-                      style={{ paddingLeft: l.depth * 12 }}
-                      onClick={() => setSelectedNode(l.name)}
-                    >
+                    <button type="button" className="text-left hover:text-emerald-400" style={{ paddingLeft: l.depth * 12 }} onClick={() => setSelectedNode(l.name)}>
                       {l.name} · thr {l.threshold} · keys {l.keyCount}
                     </button>
                   </li>
@@ -496,57 +284,40 @@ export default function PermissionVisualizerPage() {
               <div className="text-xs mb-3 tracking-widest opacity-70">SELECTED</div>
               {currentNode ? (
                 <>
-                  <div className="text-xl font-mono text-emerald-400 mb-2">
-                    {currentNode.name}
-                  </div>
-                  <div className="text-sm opacity-70 mb-1">
-                    Threshold: {currentNode.threshold}
-                  </div>
+                  <div className="text-xl font-mono text-emerald-400 mb-2">{currentNode.name}</div>
+                  <div className="text-sm opacity-70 mb-1">Threshold: {currentNode.threshold}</div>
                   {weightSum && (
-                    <div
-                      className={`text-xs font-mono mb-3 rounded-lg px-2 py-1.5 ${
-                        weightSum.satisfiable
-                          ? 'bg-emerald-500/10 text-emerald-300'
-                          : 'bg-red-500/10 text-red-300'
-                      }`}
-                    >
-                      weight {weightSum.total} (keys {weightSum.keyWeight} + accts{' '}
-                      {weightSum.accountWeight}) · thr {weightSum.threshold}
-                      {weightSum.satisfiable
-                        ? ` · surplus ${weightSum.surplus}`
-                        : ' · UNSATISFIABLE'}
+                    <div className={`text-xs font-mono mb-3 rounded-lg px-2 py-1.5 ${weightSum.satisfiable ? 'bg-emerald-500/10 text-emerald-300' : 'bg-red-500/10 text-red-300'}`}>
+                      weight {weightSum.total} (keys {weightSum.keyWeight} + accts {weightSum.accountWeight}) · thr {weightSum.threshold}
+                      {weightSum.satisfiable ? ` · surplus ${weightSum.surplus}` : ' · UNSATISFIABLE'}
                     </div>
                   )}
-                  {currentNode.parent && (
-                    <div className="text-xs opacity-50 mb-4">
-                      Parent: {currentNode.parent}
-                    </div>
-                  )}
-                  <div className="text-xs opacity-60 mb-1">
-                    KEYS ({currentNode.keys.length})
-                  </div>
+                  {currentNode.parent && <div className="text-xs opacity-50 mb-4">Parent: {currentNode.parent}</div>}
+                  <div className="text-xs opacity-60 mb-1">KEYS ({currentNode.keys.length})</div>
                   {currentNode.keys.map((k, i) => (
-                    <div
-                      key={i}
-                      className="flex justify-between text-xs py-1 border-b border-white/10 font-mono gap-2"
-                    >
+                    <div key={i} className="flex justify-between text-xs py-1 border-b border-white/10 font-mono gap-2">
                       <span className="truncate">{k.key}</span>
                       <span className="text-amber-400 shrink-0">{k.weight}</span>
                     </div>
                   ))}
                   {currentNode.accounts.length > 0 && (
                     <>
-                      <div className="text-xs opacity-60 mb-1 mt-3">
-                        ACCOUNT AUTH ({currentNode.accounts.length})
-                      </div>
+                      <div className="text-xs opacity-60 mb-1 mt-3">ACCOUNT AUTH ({currentNode.accounts.length})</div>
                       {currentNode.accounts.map((a, i) => (
-                        <div
-                          key={i}
-                          className="flex justify-between text-xs py-1 border-b border-white/10 font-mono gap-2"
-                        >
-                          <span className="truncate">
+                        <div key={i} className="flex justify-between text-xs py-1 border-b border-white/10 font-mono gap-2">
+                          <button
+                            type="button"
+                            className="truncate text-left hover:text-cyan-300"
+                            title="Add to simulator"
+                            onClick={() => {
+                              const tag = `${a.permission.actor}@${a.permission.permission}`;
+                              setSimulationAccounts((prev) =>
+                                prev.includes(tag) ? prev : [...prev, tag]
+                              );
+                            }}
+                          >
                             {a.permission.actor}@{a.permission.permission}
-                          </span>
+                          </button>
                           <span className="text-amber-400 shrink-0">{a.weight}</span>
                         </div>
                       ))}
@@ -560,12 +331,10 @@ export default function PermissionVisualizerPage() {
 
             {currentNode && (
               <div className="border border-white/10 bg-black/40 p-5 rounded-2xl print:hidden">
-                <div className="text-xs mb-3 tracking-widest opacity-70">
-                  THRESHOLD SIMULATOR
-                </div>
+                <div className="text-xs mb-3 tracking-widest opacity-70">THRESHOLD SIMULATOR</div>
                 <input
-                  placeholder="Paste key then Enter"
-                  className="w-full bg-black/50 border border-white/10 px-3 py-2 text-xs font-mono rounded mb-3"
+                  placeholder="Public key → Enter"
+                  className="w-full bg-black/50 border border-white/10 px-3 py-2 text-xs font-mono rounded mb-2"
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' && e.currentTarget.value) {
                       setSimulationKeys([...simulationKeys, e.currentTarget.value]);
@@ -573,18 +342,35 @@ export default function PermissionVisualizerPage() {
                     }
                   }}
                 />
+                <input
+                  placeholder="actor@permission → Enter"
+                  className="w-full bg-black/50 border border-white/10 px-3 py-2 text-xs font-mono rounded mb-2"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && e.currentTarget.value) {
+                      const tag = e.currentTarget.value.trim();
+                      setSimulationAccounts((prev) =>
+                        prev.includes(tag) ? prev : [...prev, tag]
+                      );
+                      e.currentTarget.value = '';
+                    }
+                  }}
+                />
+                {(simulationKeys.length > 0 || simulationAccounts.length > 0) && (
+                  <div className="text-[10px] opacity-60 mb-2 space-y-0.5 font-mono">
+                    {simulationKeys.map((k) => (<div key={k}>key: {k.slice(0, 16)}…</div>))}
+                    {simulationAccounts.map((a) => (<div key={a}>acct: {a}</div>))}
+                    <button type="button" className="underline opacity-80" onClick={() => { setSimulationKeys([]); setSimulationAccounts([]); }}>Clear sim</button>
+                  </div>
+                )}
                 {simResult && (
-                  <div
-                    className={`p-3 rounded text-xs ${
-                      simResult.canExecute
-                        ? 'bg-emerald-500/10 text-emerald-400'
-                        : 'bg-red-500/10 text-red-400'
-                    }`}
-                  >
+                  <div className={`p-3 rounded text-xs ${simResult.canExecute ? 'bg-emerald-500/10 text-emerald-400' : 'bg-red-500/10 text-red-400'}`}>
                     {simResult.canExecute ? 'CAN EXECUTE' : 'CANNOT EXECUTE'}
-                    <div className="mt-1">
-                      Weight {simResult.currentWeight} / {currentNode.threshold}
-                    </div>
+                    <div className="mt-1">Weight {simResult.currentWeight} / {currentNode.threshold}</div>
+                    {simResult.warnings.length > 0 && (
+                      <ul className="mt-2 list-disc pl-4 opacity-80 space-y-0.5">
+                        {simResult.warnings.map((w) => (<li key={w}>{w}</li>))}
+                      </ul>
+                    )}
                   </div>
                 )}
               </div>
@@ -593,9 +379,7 @@ export default function PermissionVisualizerPage() {
         </div>
 
         <WaitsNote />
-
         <GlossaryPanel />
-
         <RelatedBlueprints />
       </div>
     </div>

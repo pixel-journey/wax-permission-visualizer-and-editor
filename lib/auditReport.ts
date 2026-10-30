@@ -18,17 +18,28 @@ export function buildAuditReportMarkdown(
     "",
     `> Trust label: educational-reference · generated ${new Date().toISOString()}`,
     "",
-    `**Severity:** ${sev.score}/100 (${sev.label}) · dangers ${sev.dangerCount} · warnings ${sev.warningCount}`,
+    `**Severity:** ${sev.score}/100 (${sev.label}) · dangers ${sev.dangerCount} · warnings ${sev.warningCount} · info ${sev.infoCount}`,
     "",
-    "## Next steps",
+    "### Score reasons",
     "",
   ];
+
+  for (const r of sev.reasons) lines.push(`- ${r}`);
+
+  lines.push("", "## Next steps", "");
 
   for (const s of nextStepsChecklist(graph)) lines.push(`- ${s}`);
 
   lines.push("", "## Graph risks", "");
   if (risks.length === 0) lines.push("- None from heuristics.");
   else for (const r of risks) lines.push(`- **${r.level}**: ${r.message}`);
+
+  if (graph.linkedActions?.length) {
+    lines.push("", "## Linked actions", "");
+    for (const l of graph.linkedActions) {
+      lines.push(`- \`${l.permission}\` → \`${l.account}::${l.action}\``);
+    }
+  }
 
   if (baseline) {
     lines.push("", "## Diff vs baseline", "");
