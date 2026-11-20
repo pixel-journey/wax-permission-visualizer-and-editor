@@ -27,11 +27,13 @@ Tree · risk · severity · fixtures · live load · baseline/diff · sketches �
 ## Cluster
 
 | Need | Repo |
-|------|------|
+| --- | --- |
 | Visualize / risk | **This** |
-| Limited keys + linkauth | session-keys |
-| Social recovery design | social-recovery |
-| msig | multi-sig builder |
-| Hardware owner | hardware patterns |
+| Limited keys + linkauth | [session keys](https://github.com/pixel-journey/wax-wharfkit-session-keys-and-linked-permissions) |
+| Weighted helpers, not shared seeds | [social recovery](https://github.com/pixel-journey/wax-social-recovery-and-key-backup-tools) |
+| Named `eosio.msig` proposal | [msig builder](https://github.com/pixel-journey/wax-multi-sig-proposal-builder-and-simulator) |
+| Owner key on a device | [hardware](https://github.com/pixel-journey/wax-hardware-wallet-integration-patterns) |
+| Rotate without locking | [rotation](https://github.com/pixel-journey/wax-safe-key-rotation-assistant) |
+| Same-account active on owner | [auditor](https://github.com/pixel-journey/wax-account-permission-auditor) |
 
 Prefer **WharfKit** for live authority changes.

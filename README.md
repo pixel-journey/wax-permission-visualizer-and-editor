@@ -11,7 +11,7 @@ npm install && npm test && npm run build && npm run dev
 
 **Pass 19:** Threshold simulator includes **account-auth** (`actor@permission`); audit export embeds severity reasons + linked actions.
 
-Companions: [auditor](https://github.com/pixel-journey/wax-account-permission-auditor) · [session keys](https://github.com/pixel-journey/wax-wharfkit-session-keys-and-linked-permissions) · [key rotation](https://github.com/pixel-journey/wax-safe-key-rotation-assistant)
+Companions: [auditor](https://github.com/pixel-journey/wax-account-permission-auditor) · [session keys](https://github.com/pixel-journey/wax-wharfkit-session-keys-and-linked-permissions) · [key rotation](https://github.com/pixel-journey/wax-safe-key-rotation-assistant) · [social recovery](https://github.com/pixel-journey/wax-social-recovery-and-key-backup-tools) · [eosio.msig](https://github.com/pixel-journey/wax-multi-sig-proposal-builder-and-simulator) · [hardware](https://github.com/pixel-journey/wax-hardware-wallet-integration-patterns)
 
 Official: [WAX permissions](https://docs.wax.io/build/core-concepts/permissions) · [WharfKit](https://wharfkit.com/). Tests do not broadcast.
 
