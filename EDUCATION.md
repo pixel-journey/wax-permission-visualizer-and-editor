@@ -1,5 +1,8 @@
 # Permission trees on WAX / Antelope
 
+> **Rung:** `npm test` passes. Live `get_account` is optional UI. The tests do not broadcast `updateauth`.  
+> Official model: [WAX permissions](https://docs.wax.io/build/core-concepts/permissions). Signing tool: [WharfKit](https://wharfkit.com/).
+
 ## Hierarchy
 
 ```

@@ -11,5 +11,5 @@ export const DEFAULT_RPC_URL = RPC_ENDPOINTS[0].url;
 
 export function resolveRpcUrl(idOrUrl: string): string {
   const found = RPC_ENDPOINTS.find((e) => e.id === idOrUrl || e.url === idOrUrl);
-  return found?.url ?? idOrUrl.trim() || DEFAULT_RPC_URL;
+  return found?.url ?? (idOrUrl.trim() || DEFAULT_RPC_URL);
 }
