@@ -3,13 +3,15 @@
 > **Rung:** `npm test` passes. Live `get_account` is optional UI. The tests do not broadcast `updateauth`.  
 > **The test is the rule.** Official model: [WAX permissions](https://docs.wax.io/build/core-concepts/permissions). Signing tool: [WharfKit](https://wharfkit.com/).
 
+Antelope authorization is a **named hierarchy**, not an ERC-20 allowance list. The persistent footgun is a bad `updateauth` on **owner**.
+
 ## Learning outcomes
 
 | Level | After this file |
 | --- | --- |
 | Beginner | Sketch owner → active → custom |
-| Intermediate | Spot self-active-on-owner as critical |
-| Masterclass | Prefer linkauth for custom claim paths |
+| Intermediate | Spot self-active-on-owner as critical; distinguish from social bob@active |
+| Masterclass | Prefer linkauth for custom claim paths; never treat scores as enforcement |
 
 ---
 
@@ -21,6 +23,8 @@ owner
         └── custom (gameplay, claim, …)
 ```
 
+`owner` can change anything. `active` typically runs daily transfers and contract calls. Custom permissions should be **narrow** via `linkauth`.
+
 ```bash
 npm test
 ```
@@ -31,10 +35,11 @@ npm test
 
 | Pattern | Verdict |
 | --- | --- |
-| `alice@owner` includes `alice@active` | **Critical** |
+| `alice@owner` includes `alice@active` | **Critical** — compromised active can rewrite owner |
 | `alice@owner` includes `bob@active` | **Normal** social / multi-party |
-| Custom `claim` under active | Prefer **linkauth** |
-| Threshold > total weight | **Impossible** |
+| Custom `claim` under active | Prefer **linkauth** to specific actions |
+| Threshold > total weight | **Impossible** authority |
+| Open `eosio.token::transfer` as "session" | **High risk** |
 
 ### Attack → test
 
@@ -43,6 +48,7 @@ npm test
 | Self-active on owner | critical (see [auditor](https://github.com/pixel-journey/wax-account-permission-auditor)) |
 | Open transfer via "session" | high risk (see [session keys](https://github.com/pixel-journey/wax-wharfkit-session-keys-and-linked-permissions)) |
 | Threshold > weight sum | impossible authority |
+| Treat visualizer score as freeze | educational only |
 
 ---
 
@@ -58,13 +64,14 @@ npm test
 | Rotate without locking | [rotation](https://github.com/pixel-journey/wax-safe-key-rotation-assistant) |
 | Batch rule engine | [auditor](https://github.com/pixel-journey/wax-account-permission-auditor) |
 
-Prefer **WharfKit** for live authority changes.
+Prefer **WharfKit SessionKit** for live authority changes — not eosjs / UAL greenfield.
 
 ### Exercises
 
 1. Is bob@active on alice@owner critical? (**No** — social shape.)  
-2. Does this broadcast `updateauth`? (**No**.)  
-3. Preferred tool for live auth changes? (**WharfKit**.)
+2. Is alice@active on alice@owner critical? (**Yes**.)  
+3. Does this broadcast `updateauth`? (**No**.)  
+4. Preferred tool for live auth changes? (**WharfKit**.)
 
 ---
 
@@ -72,3 +79,4 @@ Prefer **WharfKit** for live authority changes.
 
 - Auto-broadcast of authority changes
 - That a visualizer score freezes an account
+- That Antelope risks equal ERC-20 infinite approvals
