@@ -9,6 +9,13 @@
 | Broadcast | tests do not call `updateauth` |
 | bob@active on alice@owner | normal social / multi-party shape (not critical) |
 
+## Critical vs intentional
+
+| Shape | Flag |
+| --- | --- |
+| `alice@active` on `alice@owner` | **critical** (self-escalation) |
+| `bob@active` on `alice@owner` | intentional multi-party |
+
 ## Not closed (production)
 
 | Concern | Guidance |
@@ -23,9 +30,18 @@
 1. Treating a visualizer score as a freeze or ban order.  
 2. Linking open `eosio.token::transfer` under a "session" permission.  
 3. Sharing full seeds as "social recovery."  
-4. Confusing `alice@active` on `alice@owner` (critical) with `bob@active` on `alice@owner` (intentional multi-party).  
+4. Confusing self-active-on-owner (critical) with bob-on-alice (intentional).  
 5. Auto-broadcasting planned `updateauth` from the UI.
 
 ## Honesty limits
 
-[docs.wax.io permissions](https://docs.wax.io/build/core-concepts/permissions) · [WharfKit](https://wharfkit.com/) · [auditor](https://github.com/pixel-journey/wax-account-permission-auditor) · [session keys](https://github.com/pixel-journey/wax-wharfkit-session-keys-and-linked-permissions) · [rotation](https://github.com/pixel-journey/wax-safe-key-rotation-assistant).
+No private keys. No broadcast.
+
+| Sibling | Distinction |
+| --- | --- |
+| [permission auditor](https://github.com/pixel-journey/wax-account-permission-auditor) | Read-only risk scan |
+| [session keys](https://github.com/pixel-journey/wax-wharfkit-session-keys-and-linked-permissions) | Linked permission patterns |
+| [multi-sig builder](https://github.com/pixel-journey/wax-multi-sig-proposal-builder-and-simulator) | eosio.msig shapes |
+| [key rotation](https://github.com/pixel-journey/wax-safe-key-rotation-assistant) | Rotation checklist |
+
+[docs.wax.io permissions](https://docs.wax.io/build/core-concepts/permissions) · [WharfKit](https://wharfkit.com/).
